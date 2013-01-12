@@ -3,23 +3,60 @@
 #include <unistd.h>
 #include <GL/glut.h>   // The GL Utility Toolkit (Glut) Header
 #include <iostream>
+#include "cml/cml.h"
 using namespace std;
+
+typedef cml::matrix44f_c matrix4;
+typedef cml::vector3f vector3;
+typedef cml::vector4f vector4;
+
 
 /**********************************************************
 * // GLOBAL CRAP
 **********************************************************/
 const int SCREEN_HEIGHT = 640;
 const int SCREEN_WIDTH  = 480;
-const int RASTER_SIZE = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
+const int RASTER_SIZE   = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
+
+vector3 clearColor(0,0,0);
+vector3 penColor(0,0,0);
 float raster[RASTER_SIZE];
+GLenum glDrawMode;
+
 int drawMode = 0;
-int mymode = 0;
+int mymode   = 0;
 
 /**********************************************************
 Sets the clear color.
 **********************************************************/
 void clm_glClearColor(float r, float g, float b, float a)
 {
+   glClearColor(r, g, b, a);
+   clearColor.set(r, g, b);
+   return;
+}
+
+/**********************************************************
+This function will set the color of a pixel.
+**********************************************************/
+void setPixel(int x, int y, double r, double g, double b)
+{
+   int temp = ((y * SCREEN_HEIGHT) + x) * 3;
+   raster [ temp + 0 ] = r;
+   raster [ temp + 1 ] = g;
+   raster [ temp + 2 ] = b;   
+   return;
+}
+
+/**********************************************************
+Fill roast via color.
+**********************************************************/
+void fillRasterWColor(vector3 color)
+{
+   for (int x = 0; x < SCREEN_WIDTH; x++)
+      for (int y = 0; y < SCREEN_HEIGHT; y++)
+         setPixel(x, y, color[0], color[1], color[2]);
+         
    return;
 }
 
@@ -28,6 +65,11 @@ Clears the entire screen to the clear color.
 **********************************************************/
 void clm_glClear(GLint bit)
 {
+   glClear(bit);
+   // Clear the Raster
+   if (bit != 0)
+      fillRasterWColor(clearColor);
+           
    return;
 }
 
@@ -38,6 +80,7 @@ explained more below.
 **********************************************************/
 void clm_glBegin(GLenum eVar)
 {
+   glDrawMode = eVar;
    return;
 }
 
@@ -49,6 +92,8 @@ glVertex2i(x,y) specifies the 4-vector point (x,y,0,1).
 **********************************************************/
 void clm_glVertex2i(int x, int y)
 {
+   glVertex2i(x,y);
+   //todo do somthing
    return;
 }
 
@@ -58,6 +103,7 @@ works between Begin & End pairs.
 **********************************************************/
 void clm_glEnd()
 {
+   glEnd();
    return;
 }
 
@@ -68,14 +114,75 @@ glColor3f(r,g,b) sets it to (r,g,b,1).
 **********************************************************/
 void clm_glColor3f(float r, float g, float b)
 {
+   glColor3f(r, g, b);
+   penColor.set(r, g, b);
    return;
 }
 
+/**********************************************************
+* Draw will call all of my byu functions, which will
+* draw what shapes desired.. etc.
+**********************************************************/
+void draw()
+{
+   clm_glClearColor(0,0,0,1);
+   clm_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   
+   switch (drawMode)
+   {
+      case 0:
+         
+         break;
+      case 1:
+         
+         break;
+      case 2:
+         
+         break;   
+      case 3:
+         
+         break;
+      case 4:
+         
+         break;
+      default:
+         cout << "Unknown drawMode! I'm bailing!" << endl;
+         exit(0);
+         break;         
+   }
+   return;
+}
 
-
-
-
-
+/**********************************************************
+* This function will draw my raster on top of 
+* OpenGL's result.
+**********************************************************/
+void mydraw()
+{
+   if (mymode == 2) 
+   {
+      // Save the old state so that you can set it back after you draw
+      GLint oldmatrixmode;
+      GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
+      glDisable(GL_DEPTH_TEST);
+      glGetIntegerv(GL_MATRIX_MODE,&oldmatrixmode);
+      glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
+      glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
+      
+      // Draw the array of pixels (This is where you draw the values
+      // you have stored in the array 'raster')
+      glRasterPos2f(-1,-1);
+      glDrawPixels(SCREEN_HEIGHT,SCREEN_WIDTH,GL_RGB,GL_FLOAT,raster);
+      
+      //Set the state back to what it was
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW); glPopMatrix();
+      glMatrixMode(oldmatrixmode);
+      if (depthWasEnabled)
+        glEnable(GL_DEPTH_TEST);
+   }
+   return;
+}
 
 /**********************************************************
 * Initialize the raster. //?Don't know what a raster is.
@@ -103,58 +210,36 @@ void init ()
 }
 
 /**********************************************************
-*
+* This function will display all of the desired images.
 **********************************************************/
 void display ( void )   // Create The Display Function
 {
-	 glClearColor(1,0,0,1);  // Set the clear color
-   // Clear the screen to the clear color (i.e. if the clear color
-   // is red, the screen turns red);
-   glClear(GL_COLOR_BUFFER_BIT);
-
-   if (mymode == 2) {
-      // Save the old state so that you can set it back after you draw
-      GLint oldmatrixmode;
-      GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
-      glDisable(GL_DEPTH_TEST);
-      glGetIntegerv(GL_MATRIX_MODE,&oldmatrixmode);
-      glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
-      glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
-      
-      // Draw the array of pixels (This is where you draw the values
-      // you have stored in the array 'raster')
-      glRasterPos2f(-1,-1);
-      glDrawPixels(SCREEN_HEIGHT,SCREEN_WIDTH,GL_RGB,GL_FLOAT,raster);
-      
-      //Set the state back to what it was
-      glPopMatrix();
-      glMatrixMode(GL_MODELVIEW); glPopMatrix();
-      glMatrixMode(oldmatrixmode);
-      if (depthWasEnabled)
-        glEnable(GL_DEPTH_TEST);
-   }
+   draw();
+   mydraw();
    glFlush();
-
-	//If you are using glut, you will need to uncomment the following call:
 	glutSwapBuffers();
+	return;
 }
 
 /**********************************************************
 *
 **********************************************************/
-void reshape ( int w, int h )   // Create The Reshape Function (the viewport)
+// Create The Reshape Function (the viewport)
+void reshape ( int w, int h )   
 {
 	glViewport( 0, 0, w, h );
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glOrtho(0,640, 0,480, -1,1); // only for project 2; delete thereafter!
 }
 
 /**********************************************************
 *
 **********************************************************/
-void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
+// Create Keyboard Function
+void keyboard ( unsigned char key, int x, int y )  
 {
 	switch ( key ) 
 	{
@@ -177,7 +262,8 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 /**********************************************************
 *
 **********************************************************/
-void arrow_keys ( int a_keys, int x, int y )  // Create Special Function (required for arrow keys)
+// Create Special Function (required for arrow keys)
+void arrow_keys ( int a_keys, int x, int y )  
 {
   switch ( a_keys ) {
     case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
