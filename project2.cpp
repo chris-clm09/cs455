@@ -13,7 +13,7 @@ const int SCREEN_WIDTH  = 480;
 const int RASTER_SIZE = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
 float raster[RASTER_SIZE];
 int drawMode = 0;
-
+int mymode = 0;
 
 /**********************************************************
 Sets the clear color.
@@ -112,7 +112,7 @@ void display ( void )   // Create The Display Function
    // is red, the screen turns red);
    glClear(GL_COLOR_BUFFER_BIT);
 
-   if (drawMode == 2) {
+   if (mymode == 2) {
       // Save the old state so that you can set it back after you draw
       GLint oldmatrixmode;
       GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
@@ -162,11 +162,11 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			exit ( 0 );  // Exit The Program
 			break;
 		case 49:
-		   drawMode = 1;
+		   mymode = 1;
 		   display();
 		   break;
 		case 50:
-		   drawMode = 2;
+		   mymode = 2;
 		   display();
 		   break;
 		default:
