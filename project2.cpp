@@ -12,6 +12,8 @@ typedef cml::matrix44f_c matrix4;
 typedef cml::vector3f vector3;
 typedef cml::vector4f vector4;
 
+//---------------------Forward Declarations----------------
+void setPixel(int x, int y, double r, double g, double b);
 
 /**********************************************************
 * // GLOBAL CRAP
@@ -21,6 +23,7 @@ const int SCREEN_WIDTH  = 640;
 const int RASTER_SIZE   = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
 
 vector3 clearColor(0,0,0);
+vector3 oldPenColor(0,0,0);
 vector3 penColor(0,0,0);
 float raster[RASTER_SIZE];
 GLenum glDrawMode;
@@ -28,6 +31,67 @@ vector<Point> savedPoints;
 
 int drawMode = 0;
 int mymode   = 0;
+
+/**********************************************************
+* /// Line Function ///
+* This function will draw a line between the two points.
+**********************************************************/
+void drawLine(int xOne, int yOne, int xTwo, int yTwo)
+{
+	int dX = xTwo - xOne;
+	int dY = yTwo - yOne;
+	float slope     = (float)dY / (float)dX;
+	float intersept = yTwo - slope * xTwo;
+	
+	if (dX == 0)
+	{
+		int change = (yOne > yTwo ? -1 : 1);
+		while (yOne != yTwo)
+		{
+			yOne += change;
+			setPixel(xOne, 
+			         yOne, 
+			         penColor[0], penColor[1], penColor[2]);
+		}
+		return;	
+	}
+	else if (dY == 0)
+	{
+		int change = (xOne > xTwo ? -1 : 1);
+		while (xOne != xTwo)
+		{
+			xOne += change;
+			setPixel(xOne, 
+			         yOne, 
+			         penColor[0], penColor[1], penColor[2]);
+		}
+		return;	
+	}
+	
+	if (abs(dX) > abs(dY))
+	{
+		int change = (xOne > xTwo ? -1 : 1);
+		while (xOne != xTwo)
+		{
+			xOne += change;
+			setPixel(xOne, 
+			         (unsigned int) (ceil(slope * xOne + intersept)), 
+			         penColor[0], penColor[1], penColor[2]);
+		}	
+	}
+	else
+	{
+		int change = (yOne > yTwo ? -1 : 1);
+		while (yOne != yTwo)
+		{
+			yOne += change;	
+			setPixel((unsigned int)(ceil((1.0 / slope) * (yOne - intersept))), 
+			         yOne, 
+			         penColor[0], penColor[1], penColor[2]);
+		}
+	}
+	return;
+}
 
 /**********************************************************
 Sets the clear color.
@@ -121,17 +185,19 @@ void clm_glVertex2i(int x, int y)
    else if (glDrawMode == GL_LINES)
    {
       int numPointsInLine = 2;
-      if (numPointsInLine == saveAndReachedPoints(numPointsInLine, x, y))
+      if (saveAndReachedPoints(numPointsInLine, x, y))
       {
-      
-      
+         drawLine(savedPoints[0].x,
+                  savedPoints[0].y,
+                  savedPoints[1].x,
+                  savedPoints[1].y);
          savedPoints.clear();
       }
 	}
 	else if (glDrawMode == GL_TRIANGLES)
 	{
 	   int numPointsInTri = 3;
-      if (numPointsInTri == saveAndReachedPoints(numPointsInTri, x, y))
+      if (saveAndReachedPoints(numPointsInTri, x, y))
       {
       
       
@@ -166,6 +232,7 @@ glColor3f(r,g,b) sets it to (r,g,b,1).
 void clm_glColor3f(double r, double g, double b)
 {
    glColor3f(r, g, b);
+   oldPenColor = penColor;
    penColor.set(r, g, b);
    return;
 }
@@ -181,17 +248,32 @@ void draw()
    
    switch (drawMode)
    {
-      case 0:
-         cout << "draw 0\n";
-         glBegin(GL_POINTS);
- for(float theta=0, radius=60.0; radius>1.0; theta+=0.1, radius-=0.3){
-   glColor3f(radius/60.0,0.3,1-(radius/60.0));
-   glVertex2i(200+radius*cos(theta),200+radius*sin(theta));
- }
-glEnd();  
+      case 0: //Points in Crazy Circle
+         clm_glBegin(GL_POINTS);
+         for(float theta=0, radius=60.0; radius>1.0; theta+=0.1, radius-=0.3)
+         {
+            clm_glColor3f(radius/60.0,0.3,1-(radius/60.0));
+            clm_glVertex2i(200+radius*cos(theta),200+radius*sin(theta));
+         }
+         clm_glEnd();  
          break;
-      case 1:
-         
+      case 1: //Draw crazy line
+         clm_glBegin(GL_LINES);
+         for(int i=0; i<=8; i++)
+         {
+            clm_glColor3f(1,0,0);
+            clm_glVertex2i(200,200);
+            clm_glVertex2i(200 + 10*i, 280);
+            clm_glColor3f(0,1,0);
+            clm_glVertex2i(200,200);
+            clm_glColor3f(0,1,1);
+            clm_glVertex2i(200 - 10*i, 280);
+            clm_glVertex2i(200,200);
+            clm_glVertex2i(280, 200 + 10*i);
+            clm_glVertex2i(200,200);
+            clm_glVertex2i(280, 200 - 10*i);
+         }
+         clm_glEnd();
          break;
       case 2:
          
