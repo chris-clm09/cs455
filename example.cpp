@@ -44,10 +44,18 @@ void init ()
 **********************************************************/
 void display ( void )   // Create The Display Function
 {
-	 glClearColor(1,0,0,1);  // Set the clear color
+	 glClearColor(0,0,0,1);  // Set the clear color
    // Clear the screen to the clear color (i.e. if the clear color
    // is red, the screen turns red);
    glClear(GL_COLOR_BUFFER_BIT);
+   
+   glBegin(GL_POINTS);
+         for(float theta=0, radius=60.0; radius>1.0; theta+=0.1, radius-=0.3)
+         {
+               glColor3f(radius/60.0, 0.3, 1-(radius/60.0));
+               glVertex2i(200+radius*cos(theta), 200+radius*sin(theta));
+         }
+         glEnd();
 
    if (drawMode == 2) {
       // Save the old state so that you can set it back after you draw

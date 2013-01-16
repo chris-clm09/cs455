@@ -4,6 +4,8 @@
 #include <GL/glut.h>   // The GL Utility Toolkit (Glut) Header
 #include <iostream>
 #include "cml/cml.h"
+#include <vector>
+#include "point.h"
 using namespace std;
 
 typedef cml::matrix44f_c matrix4;
@@ -14,14 +16,15 @@ typedef cml::vector4f vector4;
 /**********************************************************
 * // GLOBAL CRAP
 **********************************************************/
-const int SCREEN_HEIGHT = 640;
-const int SCREEN_WIDTH  = 480;
+const int SCREEN_HEIGHT = 480;
+const int SCREEN_WIDTH  = 640;
 const int RASTER_SIZE   = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
 
 vector3 clearColor(0,0,0);
 vector3 penColor(0,0,0);
 float raster[RASTER_SIZE];
 GLenum glDrawMode;
+vector<Point> savedPoints;
 
 int drawMode = 0;
 int mymode   = 0;
@@ -41,10 +44,10 @@ This function will set the color of a pixel.
 **********************************************************/
 void setPixel(int x, int y, double r, double g, double b)
 {
-   int temp = ((y * SCREEN_HEIGHT) + x) * 3;
-   raster [ temp + 0 ] = r;
-   raster [ temp + 1 ] = g;
-   raster [ temp + 2 ] = b;   
+   int temp = ((y * SCREEN_WIDTH) + x) * 3;
+   raster[ temp + 0 ] = r;
+   raster[ temp + 1 ] = g;
+   raster[ temp + 2 ] = b;   
    return;
 }
 
@@ -80,8 +83,27 @@ explained more below.
 **********************************************************/
 void clm_glBegin(GLenum eVar)
 {
+   glBegin(eVar);
    glDrawMode = eVar;
    return;
+}
+
+/**********************************************************
+This function will save the given point and return if 
+the desired number of points has been reached.
+**********************************************************/
+bool saveAndReachedPoints(int num, int x, int y)
+{
+   if (savedPoints.size() < num)
+   {  //save
+      savedPoints.push_back(Point(x,y));
+      return savedPoints.size() == num;
+   }
+   else 
+   {        
+      cout << "Error: Invalid number of saved Points.\n";	   
+      exit(0);
+   }
 }
 
 /**********************************************************
@@ -93,7 +115,35 @@ glVertex2i(x,y) specifies the 4-vector point (x,y,0,1).
 void clm_glVertex2i(int x, int y)
 {
    glVertex2i(x,y);
-   //todo do somthing
+   
+   if (glDrawMode == GL_POINTS) 
+      setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+   else if (glDrawMode == GL_LINES)
+   {
+      int numPointsInLine = 2;
+      if (numPointsInLine == saveAndReachedPoints(numPointsInLine, x, y))
+      {
+      
+      
+         savedPoints.clear();
+      }
+	}
+	else if (glDrawMode == GL_TRIANGLES)
+	{
+	   int numPointsInTri = 3;
+      if (numPointsInTri == saveAndReachedPoints(numPointsInTri, x, y))
+      {
+      
+      
+         savedPoints.clear();
+      }	    
+	}
+	else if (true)
+	{
+	   cout << "Holly Crap!" << endl;
+	   exit(0);
+	}
+   
    return;
 }
 
@@ -104,6 +154,7 @@ works between Begin & End pairs.
 void clm_glEnd()
 {
    glEnd();
+   //? Do we need to do somthing?????
    return;
 }
 
@@ -112,7 +163,7 @@ There is one current color (a 4-vector) at all times in
 OpenGL. Initially, it is (1,1,1,1) (white). Calling 
 glColor3f(r,g,b) sets it to (r,g,b,1). 
 **********************************************************/
-void clm_glColor3f(float r, float g, float b)
+void clm_glColor3f(double r, double g, double b)
 {
    glColor3f(r, g, b);
    penColor.set(r, g, b);
@@ -126,12 +177,18 @@ void clm_glColor3f(float r, float g, float b)
 void draw()
 {
    clm_glClearColor(0,0,0,1);
-   clm_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   clm_glClear(GL_COLOR_BUFFER_BIT);
    
    switch (drawMode)
    {
       case 0:
-         
+         cout << "draw 0\n";
+         glBegin(GL_POINTS);
+ for(float theta=0, radius=60.0; radius>1.0; theta+=0.1, radius-=0.3){
+   glColor3f(radius/60.0,0.3,1-(radius/60.0));
+   glVertex2i(200+radius*cos(theta),200+radius*sin(theta));
+ }
+glEnd();  
          break;
       case 1:
          
@@ -161,6 +218,7 @@ void mydraw()
 {
    if (mymode == 2) 
    {
+      cout << "My CRAMO" << endl;
       // Save the old state so that you can set it back after you draw
       GLint oldmatrixmode;
       GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
@@ -172,7 +230,7 @@ void mydraw()
       // Draw the array of pixels (This is where you draw the values
       // you have stored in the array 'raster')
       glRasterPos2f(-1,-1);
-      glDrawPixels(SCREEN_HEIGHT,SCREEN_WIDTH,GL_RGB,GL_FLOAT,raster);
+      glDrawPixels(SCREEN_WIDTH,SCREEN_HEIGHT,GL_RGB,GL_FLOAT,raster);
       
       //Set the state back to what it was
       glPopMatrix();
@@ -206,6 +264,7 @@ void init ()
    glEnable(GL_DEPTH_TEST);			// Enables Depth Testing
    glDepthFunc(GL_LEQUAL);				// The Type Of Depth Testing To Do
    glEnable(GL_COLOR_MATERIAL);
+   glEnable( GL_POINT_SMOOTH );
    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 
@@ -286,7 +345,7 @@ int main ( int argc, char** argv )   // Create Main Function
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE); // Display Mode
-  glutInitWindowSize(640, 480); // This is the window size
+  glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT); // This is the window size
   glutCreateWindow("OpenGL Example Program"); // Window Title
   init();
   glutDisplayFunc(display);  // Matching Earlier Functions To Their Counterparts
