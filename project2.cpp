@@ -303,12 +303,7 @@ void draw()
          clm_glEnd();
          break;
       case 2:
-         clm_glBegin(GL_LINES);
-         clm_glColor3f(1,0,0);
-         clm_glVertex2i(200,200);
-         clm_glColor3f(0,1,1);
-         clm_glVertex2i(200 + 10*2, 280);
-         clm_glEnd();   
+            
          break;   
       case 3:
          
