@@ -56,6 +56,7 @@ void setLinePixel(int xOne, int yOne, int xTwo, int yTwo,
 **********************************************************/
 void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 {
+   int pts[] = { xOne, yOne, xTwo, yTwo };
 	int dX = xTwo - xOne;
 	int dY = yTwo - yOne;
 	float slope     = (float)dY / (float)dX;
@@ -67,7 +68,7 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		while (yOne != yTwo)
 		{
 			yOne += change;
-			setLinePixel(xOne, yOne, xTwo, yTwo, xOne, yOne);
+			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne);
 		}
 		return;	
 	}
@@ -77,7 +78,7 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		while (xOne != xTwo)
 		{
 			xOne += change;
-			setLinePixel(xOne, yOne, xTwo, yTwo, xOne, yOne);
+			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne);
 		}
 		return;	
 	}
@@ -88,7 +89,7 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		while (xOne != xTwo)
 		{
 			xOne += change;
-			setLinePixel(xOne, yOne, xTwo, yTwo, xOne, 
+			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, 
 			             (unsigned int) (ceil(slope * xOne + intersept)));
 		}	
 	}
@@ -98,7 +99,7 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		while (yOne != yTwo)
 		{
 			yOne += change;	
-			setLinePixel(xOne, yOne, xTwo, yTwo, 
+			setLinePixel(pts[0], pts[1], pts[2], pts[3], 
 			         (unsigned int)(ceil((1.0 / slope) * (yOne - intersept))), 
 			         yOne);
 		}
@@ -133,9 +134,10 @@ This function will return the color of a pixel.
 **********************************************************/
 vector3 getPixelColor(int x, int y)
 {
-   char pick_col[3];
-   glReadPixels(x , y , 1 , 1 , GL_RGB , GL_UNSIGNED_BYTE , pick_col);
-   return vector3(pick_col[0],pick_col[1],pick_col[2]); 
+   int temp = ((y * SCREEN_WIDTH) + x) * 3;
+   return vector3(raster[ temp + 0 ],
+                  raster[ temp + 1 ],
+                  raster[ temp + 2 ]); 
 }
 
 /**********************************************************
@@ -301,7 +303,12 @@ void draw()
          clm_glEnd();
          break;
       case 2:
-         
+         clm_glBegin(GL_LINES);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(200,200);
+         clm_glColor3f(0,1,1);
+         clm_glVertex2i(200 + 10*2, 280);
+         clm_glEnd();   
          break;   
       case 3:
          
