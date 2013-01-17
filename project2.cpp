@@ -67,9 +67,7 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		while (yOne != yTwo)
 		{
 			yOne += change;
-			setPixel(xOne, 
-			         yOne, 
-			         penColor[0], penColor[1], penColor[2]);
+			setLinePixel(xOne, yOne, xTwo, yTwo, xOne, yOne);
 		}
 		return;	
 	}
@@ -79,9 +77,7 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		while (xOne != xTwo)
 		{
 			xOne += change;
-			setPixel(xOne, 
-			         yOne, 
-			         penColor[0], penColor[1], penColor[2]);
+			setLinePixel(xOne, yOne, xTwo, yTwo, xOne, yOne);
 		}
 		return;	
 	}
@@ -92,9 +88,8 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		while (xOne != xTwo)
 		{
 			xOne += change;
-			setPixel(xOne, 
-			         (unsigned int) (ceil(slope * xOne + intersept)), 
-			         penColor[0], penColor[1], penColor[2]);
+			setLinePixel(xOne, yOne, xTwo, yTwo, xOne, 
+			             (unsigned int) (ceil(slope * xOne + intersept)));
 		}	
 	}
 	else
@@ -103,9 +98,9 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		while (yOne != yTwo)
 		{
 			yOne += change;	
-			setPixel((unsigned int)(ceil((1.0 / slope) * (yOne - intersept))), 
-			         yOne, 
-			         penColor[0], penColor[1], penColor[2]);
+			setLinePixel(xOne, yOne, xTwo, yTwo, 
+			         (unsigned int)(ceil((1.0 / slope) * (yOne - intersept))), 
+			         yOne);
 		}
 	}
 	return;
