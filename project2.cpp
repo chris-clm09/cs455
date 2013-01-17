@@ -11,6 +11,7 @@ using namespace std;
 typedef cml::matrix44f_c matrix4;
 typedef cml::vector3f vector3;
 typedef cml::vector4f vector4;
+#include "ColorInterpolation.h"
 
 //---------------------Forward Declarations----------------
 void setPixel(int x, int y, double r, double g, double b);
@@ -23,7 +24,6 @@ const int SCREEN_WIDTH  = 640;
 const int RASTER_SIZE   = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
 
 vector3 clearColor(0,0,0);
-vector3 oldPenColor(0,0,0);
 vector3 penColor(0,0,0);
 float raster[RASTER_SIZE];
 GLenum glDrawMode;
@@ -116,6 +116,16 @@ void setPixel(int x, int y, double r, double g, double b)
 }
 
 /**********************************************************
+This function will return the color of a pixel.
+**********************************************************/
+vector3 getPixelColor(int x, int y)
+{
+   char pick_col[3];
+   glReadPixels(x , y , 1 , 1 , GL_RGB , GL_UNSIGNED_BYTE , pick_col);
+   return vector3(pick_col[0],pick_col[1],pick_col[2]); 
+}
+
+/**********************************************************
 Fill roast via color.
 **********************************************************/
 void fillRasterWColor(vector3 color)
@@ -187,12 +197,15 @@ void clm_glVertex2i(int x, int y)
       int numPointsInLine = 2;
       if (saveAndReachedPoints(numPointsInLine, x, y))
       {
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
          drawLine(savedPoints[0].x,
                   savedPoints[0].y,
                   savedPoints[1].x,
                   savedPoints[1].y);
          savedPoints.clear();
       }
+      else if (savedPoints.size() == 1)
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
 	}
 	else if (glDrawMode == GL_TRIANGLES)
 	{
@@ -232,7 +245,6 @@ glColor3f(r,g,b) sets it to (r,g,b,1).
 void clm_glColor3f(double r, double g, double b)
 {
    glColor3f(r, g, b);
-   oldPenColor = penColor;
    penColor.set(r, g, b);
    return;
 }
