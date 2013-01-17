@@ -15,6 +15,7 @@ typedef cml::vector4f vector4;
 
 //---------------------Forward Declarations----------------
 void setPixel(int x, int y, double r, double g, double b);
+vector3 getPixelColor(int x, int y);
 
 /**********************************************************
 * // GLOBAL CRAP
@@ -31,6 +32,23 @@ vector<Point> savedPoints;
 
 int drawMode = 0;
 int mymode   = 0;
+
+/**********************************************************
+This function will set a pixel in a line.
+**********************************************************/
+void setLinePixel(int xOne, int yOne, int xTwo, int yTwo,
+                  int cX, int cY)
+{
+   vector3 theColor = interpolateColor( getPixelColor(xOne,yOne),
+                                        getPixelColor(xTwo,yTwo),
+                                        getFraction(xOne, yOne,
+                                                    xTwo, yTwo,
+                                                    cX, cY));
+   setPixel(cX, 
+	         cY, 
+	         theColor[0], theColor[1], theColor[2]);      
+   return;
+}                  
 
 /**********************************************************
 * /// Line Function ///
