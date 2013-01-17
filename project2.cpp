@@ -33,6 +33,8 @@ vector<Point> savedPoints;
 int drawMode = 0;
 int mymode   = 0;
 
+void pp(vector3 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}
+
 /**********************************************************
 This function will set a pixel in a line.
 **********************************************************/
@@ -49,6 +51,7 @@ void setLinePixel(int xOne, int yOne, int xTwo, int yTwo,
 	         theColor[0], theColor[1], theColor[2]);      
    return;
 }                  
+
 
 /**********************************************************
 * /// Line Function ///
@@ -113,6 +116,35 @@ vector<Point> drawLine(int xOne, int yOne, int xTwo, int yTwo)
 	return theLine;
 }
 
+
+/**********************************************************
+This function will fill in the area between two lines
+with interpolated color.
+**********************************************************/
+void fill(vector<Point> line1, vector<Point> line2)
+{
+   float rate      = (line2.size() - 1.0) / ((float)line1.size() - 1.0);
+   bool  direction = line1[0].eq(line2[0]); 
+
+   for (int i = 0; i < line1.size(); i++)
+      drawLine(line1[i].x, line1[i].y, 
+               line2[(unsigned int)ceil(
+               (direction ? i * rate : line2.size() - 1 - i * rate)
+               )].x , 
+               line2[(unsigned int)ceil(
+               (direction ? i * rate : line2.size() - 1 - i * rate)
+               )].y);
+   for (int i = 0; i < line1.size(); i++)
+      drawLine(line1[i].x, line1[i].y, 
+               line2[(unsigned int)floor(
+               (direction ? i * rate : line2.size() - 1 - i * rate)
+               )].x , 
+               line2[(unsigned int)floor(
+               (direction ? i * rate : line2.size() - 1 - i * rate)
+               )].y);
+   return;
+}
+
 /**********************************************************
 Sets the clear color.
 **********************************************************/
@@ -147,7 +179,7 @@ vector3 getPixelColor(int x, int y)
 }
 
 /**********************************************************
-Fill roast via color.
+Fill raster via color.
 **********************************************************/
 void fillRasterWColor(vector3 color)
 {
@@ -219,10 +251,8 @@ void clm_glVertex2i(int x, int y)
       if (saveAndReachedPoints(numPointsInLine, x, y))
       {
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         drawLine(savedPoints[0].x,
-                  savedPoints[0].y,
-                  savedPoints[1].x,
-                  savedPoints[1].y);
+         drawLine(savedPoints[0].x, savedPoints[0].y,
+                  savedPoints[1].x, savedPoints[1].y);
          savedPoints.clear();
       }
       else if (savedPoints.size() == 1)
@@ -235,20 +265,19 @@ void clm_glVertex2i(int x, int y)
       {
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
          
-         drawLine(savedPoints[0].x,
-                  savedPoints[0].y,
-                  savedPoints[1].x,
-                  savedPoints[1].y);
+         vector<Point> lines[3];
          
-         drawLine(savedPoints[1].x,
-                  savedPoints[1].y,
-                  savedPoints[2].x,
-                  savedPoints[2].y);
-
-         drawLine(savedPoints[2].x,
-                  savedPoints[2].y,
-                  savedPoints[0].x,
-                  savedPoints[0].y);
+         lines[0] = drawLine(savedPoints[0].x, savedPoints[0].y,
+                  savedPoints[1].x, savedPoints[1].y);
+         lines[1] = drawLine(savedPoints[1].x, savedPoints[1].y,
+                  savedPoints[2].x, savedPoints[2].y);
+         lines[2] = drawLine(savedPoints[2].x, savedPoints[2].y,
+                  savedPoints[0].x, savedPoints[0].y);
+         
+        fill(lines[0], lines[1]);
+        //fill(lines[1], lines[0]);
+        //fill(lines[1], lines[2]);
+        //fill(lines[2], lines[0]);
          
          savedPoints.clear();
       }
@@ -344,7 +373,7 @@ void draw()
             clm_glEnd();   
          break;   
       case 3:
-         
+            
          break;
       case 4:
          
