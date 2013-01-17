@@ -54,13 +54,14 @@ void setLinePixel(int xOne, int yOne, int xTwo, int yTwo,
 * /// Line Function ///
 * This function will draw a line between the two points.
 **********************************************************/
-void drawLine(int xOne, int yOne, int xTwo, int yTwo)
+vector<Point> drawLine(int xOne, int yOne, int xTwo, int yTwo)
 {
    int pts[] = { xOne, yOne, xTwo, yTwo };
 	int dX = xTwo - xOne;
 	int dY = yTwo - yOne;
 	float slope     = (float)dY / (float)dX;
 	float intersept = yTwo - slope * xTwo;
+	vector<Point> theLine;
 	
 	if (dX == 0)
 	{
@@ -69,8 +70,9 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		{
 			yOne += change;
 			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne);
+			theLine.push_back(Point(xOne,yOne));
 		}
-		return;	
+		return theLine;	
 	}
 	else if (dY == 0)
 	{
@@ -79,32 +81,36 @@ void drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		{
 			xOne += change;
 			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne);
+			theLine.push_back(Point(xOne,yOne));
 		}
-		return;	
+		return theLine;	
 	}
 	
 	if (abs(dX) > abs(dY))
 	{
 		int change = (xOne > xTwo ? -1 : 1);
+		unsigned int newY; 
 		while (xOne != xTwo)
 		{
 			xOne += change;
-			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, 
-			             (unsigned int) (ceil(slope * xOne + intersept)));
+			newY = (unsigned int) (ceil(slope * xOne + intersept));
+			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, newY);
+			theLine.push_back(Point(xOne, newY));
 		}	
 	}
 	else
 	{
 		int change = (yOne > yTwo ? -1 : 1);
+		unsigned int newX;
 		while (yOne != yTwo)
 		{
-			yOne += change;	
-			setLinePixel(pts[0], pts[1], pts[2], pts[3], 
-			         (unsigned int)(ceil((1.0 / slope) * (yOne - intersept))), 
-			         yOne);
+			yOne += change;
+			newX = (unsigned int)(ceil((1.0 / slope) * (yOne - intersept)));
+			setLinePixel(pts[0], pts[1], pts[2], pts[3], newX, yOne);
+			theLine.push_back(Point(newX,yOne));
 		}
 	}
-	return;
+	return theLine;
 }
 
 /**********************************************************
@@ -227,10 +233,29 @@ void clm_glVertex2i(int x, int y)
 	   int numPointsInTri = 3;
       if (saveAndReachedPoints(numPointsInTri, x, y))
       {
-      
-      
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+         
+         drawLine(savedPoints[0].x,
+                  savedPoints[0].y,
+                  savedPoints[1].x,
+                  savedPoints[1].y);
+         
+         drawLine(savedPoints[1].x,
+                  savedPoints[1].y,
+                  savedPoints[2].x,
+                  savedPoints[2].y);
+
+         drawLine(savedPoints[2].x,
+                  savedPoints[2].y,
+                  savedPoints[0].x,
+                  savedPoints[0].y);
+         
          savedPoints.clear();
-      }	    
+      }
+      else if (savedPoints.size() == 1 ||
+               savedPoints.size() == 2)
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+         	    
 	}
 	else if (true)
 	{
@@ -303,7 +328,20 @@ void draw()
          clm_glEnd();
          break;
       case 2:
-            
+            clm_glBegin(GL_TRIANGLES);
+            clm_glColor3f(1,0,0);
+            clm_glVertex2i(300,300);
+            clm_glColor3f(0,1,0);
+            clm_glVertex2i(600,300);
+            clm_glColor3f(0,0,1);
+            clm_glVertex2i(450,410);
+            clm_glColor3f(1,1,0);
+            clm_glVertex2i(100,400);
+            clm_glColor3f(0,1,1);
+            clm_glVertex2i(70,60);
+            clm_glColor3f(1,0,1);
+            clm_glVertex2i(350,100);
+            clm_glEnd();   
          break;   
       case 3:
          
@@ -327,7 +365,6 @@ void mydraw()
 {
    if (mymode == 2) 
    {
-      cout << "My CRAMO" << endl;
       // Save the old state so that you can set it back after you draw
       GLint oldmatrixmode;
       GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
@@ -455,7 +492,7 @@ int main ( int argc, char** argv )   // Create Main Function
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE); // Display Mode
   glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT); // This is the window size
-  glutCreateWindow("OpenGL Example Program"); // Window Title
+  glutCreateWindow("CLM/OpenGL Graphics Program"); // Window Title
   init();
   glutDisplayFunc(display);  // Matching Earlier Functions To Their Counterparts
   glutReshapeFunc(reshape);
