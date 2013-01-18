@@ -32,6 +32,7 @@ float raster[RASTER_SIZE];
 GLenum glDrawMode;
 vector<Point> savedPoints;
 Point firstPt(-1,-1);
+int lineWidth = 1;
 
 int drawMode = 0;
 int mymode   = 0;
@@ -76,6 +77,11 @@ vector<Point> drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		{
 			yOne += change;
 			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne);
+			for (int i = 0; i <= lineWidth/2; i++)
+			{
+			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne+i, yOne);
+			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne-i, yOne);
+			}      
 			theLine.push_back(Point(xOne,yOne));
 		}
 		return theLine;	
@@ -87,6 +93,11 @@ vector<Point> drawLine(int xOne, int yOne, int xTwo, int yTwo)
 		{
 			xOne += change;
 			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne);
+			for (int i = 0; i <= lineWidth/2; i++)
+			{
+			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne+i);
+			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne-i);
+			}
 			theLine.push_back(Point(xOne,yOne));
 		}
 		return theLine;	
@@ -101,6 +112,11 @@ vector<Point> drawLine(int xOne, int yOne, int xTwo, int yTwo)
 			xOne += change;
 			newY = (unsigned int) (ceil(slope * xOne + intersept));
 			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, newY);
+			for (int i = 0; i <= lineWidth/2; i++)
+			{
+			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne+i, newY);
+   			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne-i, newY);
+   	   }
 			theLine.push_back(Point(xOne, newY));
 		}	
 	}
@@ -113,6 +129,11 @@ vector<Point> drawLine(int xOne, int yOne, int xTwo, int yTwo)
 			yOne += change;
 			newX = (unsigned int)(ceil((1.0 / slope) * (yOne - intersept)));
 			setLinePixel(pts[0], pts[1], pts[2], pts[3], newX, yOne);
+			for (int i = 0; i <= lineWidth/2; i++)
+			{
+			   setLinePixel(pts[0], pts[1], pts[2], pts[3], newX+i, yOne);
+   			setLinePixel(pts[0], pts[1], pts[2], pts[3], newX-i, yOne);
+   	   }
 			theLine.push_back(Point(newX,yOne));
 		}
 	}
@@ -432,9 +453,6 @@ void clm_glVertex2i(int x, int y)
                savedPoints.size() == 3)
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
-   else if (glDrawMode == GL_POLYGON)//see GL_TRIANGLE_FAN.
-	{
-   }
    else if (true)
 	{
 	   cout << "Holly Crap!" << endl;
@@ -480,7 +498,7 @@ This function will set the pen width.
 void clm_glLineWidth(int lwidth)
 {
    glLineWidth(lwidth);
-   //TODO::Write this guy!   
+   lineWidth = lwidth;
    return;
 }
 
