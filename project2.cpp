@@ -278,7 +278,40 @@ void clm_glVertex2i(int x, int y)
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
          	    
 	}
-	else if (true)
+   else if (glDrawMode == GL_LINE_STRIP)//Draws one line segment for every call to glVertex2i except the first; vertices n and n + 1 define line segment n.
+   {
+      if (savedPoints.size() == 0)
+      {
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+         saveAndReachedPoints(2, x, y);
+      }
+      else
+      {
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+         drawLine(savedPoints[0].x, savedPoints[0].y,
+                  savedPoints[1].x, savedPoints[1].y);
+         savedPoints.erase(savedPoints.begin());
+      }                                                                                                     
+   }
+   else if (glDrawMode == GL_LINE_LOOP)//Exactly like GL_LINE_STRIP except one additional line is draw between the first and last calls to glVertex2i when glEnd is called.
+   {
+   }
+   else if (glDrawMode == GL_TRIANGLE_STRIP)//Draws a connected group of triangles. One triangle is defined for each vertex presented after the first two vertices. For odd n, vertices n, n + 1, and n + 2 define triangle n. For even n, vertices n + 1, n, and n + 2 define triangle n. The alternating order becomes important later when we add backface culling.
+   {
+   }
+   else if (glDrawMode == GL_TRIANGLE_FAN)//Draws a connected group of triangles. One triangle is defined for each vertex presented after the first two vertices. Vertices 1, n + 1, and n + 2 define triangle n.
+   {
+   }
+   else if (glDrawMode == GL_QUADS)//A quadrilateral is defined for every four vertices 4n-3, 4n-2, 4n-1, 4n; each quadrilateral can be rendered directly or split into two triangles. You can assume the quad vertices are specified in an order that make them convex.
+   {
+   }
+   else if (glDrawMode == GL_QUAD_STRIP)//A connected group of quadrilaterals, with one defined for every two vertices beyond the first two (if the first point is called 1, not 0, then for all n, the points 2n-1, 2n, 2n+2, 2n+1 make a quad); each quadrilateral can be rendered directly or split into two triangles. You can assume the quad strip vertices are given in an order that makes them convex. Note that the order in which vertices are used to construct a quadrilateral from strip data is different from that used with independent data.
+   {
+   }
+   else if (glDrawMode == GL_POLYGON)//see GL_TRIANGLE_FAN.
+	{
+   }
+   else if (true)
 	{
 	   cout << "Holly Crap!" << endl;
 	   exit(0);
@@ -294,6 +327,7 @@ works between Begin & End pairs.
 void clm_glEnd()
 {
    glEnd();
+   savedPoints.clear();
    //? Do we need to do somthing?????
    return;
 }
@@ -307,6 +341,17 @@ void clm_glColor3f(double r, double g, double b)
 {
    glColor3f(r, g, b);
    penColor.set(r, g, b);
+   return;
+}
+
+
+/**********************************************************
+This function will set the pen width.
+**********************************************************/
+void clm_glLineWidth(int lwidth)
+{
+   glLineWidth(lwidth);
+   //TODO::Write this guy!   
    return;
 }
 
@@ -352,40 +397,197 @@ void draw()
             clm_glBegin(GL_TRIANGLES);
             clm_glColor3f(1,0,0);
             clm_glVertex2i(300,300);
-           
             clm_glColor3f(0,1,0);
             clm_glVertex2i(600,300);
-           
             clm_glColor3f(0,0,1);
             clm_glVertex2i(450,410);
-           //2
             clm_glColor3f(1,1,0);
             clm_glVertex2i(100,400);
-            
             clm_glColor3f(0,1,1);
             clm_glVertex2i(70,60);
-            
             clm_glColor3f(1,0,1);
             clm_glVertex2i(350,100);
-            
-            //3
             clm_glColor3f(1,1,0);
             clm_glVertex2i(500,470);
-            
             clm_glColor3f(0,1,1);
             clm_glVertex2i(600,400);
-            
             clm_glColor3f(1,0,1);
             clm_glVertex2i(600,450);
-            
-            
             clm_glEnd();   
          break;   
       case 3:
-            
+         clm_glBegin(GL_LINE_STRIP);
+         clm_glColor3f(0.42,0.27,0.11);
+         clm_glVertex2i(250,30);
+         clm_glVertex2i(270,60);
+         clm_glVertex2i(270,210);
+         clm_glColor3f(0.04,0.70,0.02);
+         clm_glVertex2i(230,230);
+         clm_glVertex2i(220,270);
+         clm_glVertex2i(220,310);
+         clm_glVertex2i(250,340);
+         clm_glVertex2i(275,360);
+         clm_glVertex2i(325,360);
+         clm_glVertex2i(350,340);
+         clm_glVertex2i(380,310);
+         clm_glVertex2i(380,270);
+         clm_glVertex2i(370,230);
+         clm_glColor3f(0.42,0.27,0.11);
+         clm_glVertex2i(330,210);
+         clm_glVertex2i(330,60);
+         clm_glVertex2i(350,30);
+         clm_glEnd();   
          break;
       case 4:
-         
+         clm_glBegin(GL_LINE_LOOP);
+         clm_glColor3f(0.42,0.27,0.11);
+         clm_glVertex2i(250,30);
+         clm_glVertex2i(270,60);
+         clm_glVertex2i(270,210);
+         clm_glColor3f(0.04,0.70,0.02);
+         clm_glVertex2i(230,230);
+         clm_glVertex2i(220,270);
+         clm_glVertex2i(220,310);
+         clm_glVertex2i(250,340);
+         clm_glVertex2i(275,360);
+         clm_glVertex2i(325,360);
+         clm_glVertex2i(350,340);
+         clm_glVertex2i(380,310);
+         clm_glVertex2i(380,270);
+         clm_glVertex2i(370,230);
+         clm_glColor3f(0.42,0.27,0.11);
+         clm_glVertex2i(330,210);
+         clm_glVertex2i(330,60);
+         clm_glVertex2i(350,30);
+         clm_glEnd(); 
+         break;
+      case 5:
+         clm_glBegin(GL_TRIANGLE_STRIP);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(40,70);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(40,390);
+         clm_glColor3f(1,1,0);
+         clm_glVertex2i(130,30);
+         clm_glColor3f(0,0,1);
+         clm_glVertex2i(130,350);
+         clm_glColor3f(1,0,1);
+         clm_glVertex2i(330,80);
+         clm_glColor3f(0,1,1);
+         clm_glVertex2i(330,400);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(480,40);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(530,330);
+         clm_glEnd();
+         break;
+      case 6:
+         clm_glBegin(GL_TRIANGLE_FAN);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(250,170);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(400,140);
+         clm_glColor3f(1,1,0);
+         clm_glVertex2i(300,50);
+         clm_glColor3f(0,0,1);
+         clm_glVertex2i(175,55);
+         clm_glColor3f(1,0,1);
+         clm_glVertex2i(100,170);
+         clm_glColor3f(0,1,1);
+         clm_glVertex2i(175,285);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(300,290);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(400,200);
+         clm_glEnd();
+         break;
+      case 7:
+         clm_glBegin(GL_QUADS);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(40,70);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(40,390);
+         clm_glColor3f(0,0,1);
+         clm_glVertex2i(130,350);
+         clm_glColor3f(1,1,0);
+         clm_glVertex2i(130,30);
+         clm_glColor3f(1,0,1);
+         clm_glVertex2i(330,80);
+         clm_glColor3f(0,1,1);
+         clm_glVertex2i(330,400);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(530,330);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(480,40);
+         clm_glEnd();
+         break;
+      case 8:
+         clm_glBegin(GL_QUAD_STRIP);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(40,70);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(40,390);
+         clm_glColor3f(1,1,0);
+         clm_glVertex2i(130,30);
+         clm_glColor3f(0,0,1);
+         clm_glVertex2i(130,350);
+         clm_glColor3f(1,0,1);
+         clm_glVertex2i(330,80);
+         clm_glColor3f(0,1,1);
+         clm_glVertex2i(330,400);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(480,40);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(530,330);
+         clm_glEnd();
+         break;
+      case 9:
+         clm_glBegin(GL_POLYGON);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(250,170);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(400,140);
+         clm_glColor3f(1,1,0);
+         clm_glVertex2i(300,50);
+         clm_glColor3f(0,0,1);
+         clm_glVertex2i(175,55);
+         clm_glColor3f(1,0,1);
+         clm_glVertex2i(100,170);
+         clm_glColor3f(0,1,1);
+         clm_glVertex2i(175,285);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(300,290);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(400,200);
+         clm_glEnd();
+         break;   
+      case 10:
+         clm_glLineWidth(5);
+         clm_glBegin(GL_LINES);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(200,270);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(225,300);
+         clm_glVertex2i(225,300);
+         clm_glColor3f(1,1,0);
+         clm_glVertex2i(255,300);
+         clm_glVertex2i(255,300);
+         clm_glColor3f(0,0,1);
+         clm_glVertex2i(280,270);
+         clm_glVertex2i(280,270);
+         clm_glColor3f(1,0,1);
+         clm_glVertex2i(280,230);
+         clm_glVertex2i(280,230);
+         clm_glColor3f(0,1,1);
+         clm_glVertex2i(240,190);
+         clm_glVertex2i(240,190);
+         clm_glColor3f(1,0,0);
+         clm_glVertex2i(240,160);
+         clm_glVertex2i(240,150);
+         clm_glColor3f(0,1,0);
+         clm_glVertex2i(240,145);
+         clm_glEnd();
+         clm_glLineWidth(1);
          break;
       default:
          cout << "Unknown drawMode! I'm bailing!" << endl;
@@ -510,11 +712,11 @@ void arrow_keys ( int a_keys, int x, int y )
 {
   switch ( a_keys ) {
     case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
-      drawMode = (drawMode+1)%5;
+      drawMode = (drawMode+1)%11;
       display();
       break;
     case GLUT_KEY_DOWN:               // When Down Arrow Is Pressed...
-      if ((drawMode=drawMode-1) < 0)drawMode=4;
+      if ((drawMode=drawMode-1) < 0)drawMode=10;
       display();
       break;
     default:
