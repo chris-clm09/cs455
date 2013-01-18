@@ -227,6 +227,7 @@ bool saveAndReachedPoints(int num, int x, int y)
    }
 }
 
+
 void drawStrip(int x, int y)
 {
    if (savedPoints.size() == 0)
@@ -299,11 +300,15 @@ void clm_glVertex2i(int x, int y)
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
          	    
 	}
-   else if (glDrawMode == GL_LINE_STRIP)//Draws one line segment for every call to glVertex2i except the first; vertices n and n + 1 define line segment n.
+   //Draws one line segment for every call to glVertex2i except the first; 
+   //vertices n and n + 1 define line segment n.
+   else if (glDrawMode == GL_LINE_STRIP)
    {
       drawStrip(x,y);                                                                                                
    }
-   else if (glDrawMode == GL_LINE_LOOP)//Exactly like GL_LINE_STRIP except one additional line is draw between the first and last calls to glVertex2i when glEnd is called.
+   //Exactly like GL_LINE_STRIP except one additional line is draw between 
+   //the first and last calls to glVertex2i when glEnd is called.
+   else if (glDrawMode == GL_LINE_LOOP)
    {
       if (firstPt.eq(Point(-1,-1)))
          firstPt.set(x,y);
@@ -311,15 +316,121 @@ void clm_glVertex2i(int x, int y)
    }
    else if (glDrawMode == GL_TRIANGLE_STRIP)//Draws a connected group of triangles. One triangle is defined for each vertex presented after the first two vertices. For odd n, vertices n, n + 1, and n + 2 define triangle n. For even n, vertices n + 1, n, and n + 2 define triangle n. The alternating order becomes important later when we add backface culling.
    {
+      int numPointsInTri = 3;
+      if (saveAndReachedPoints(numPointsInTri, x, y))
+      {
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+         
+         vector<Point> points;
+         vector<Point> temp;
+         
+         points = drawLine(savedPoints[0].x, savedPoints[0].y,
+                  savedPoints[1].x, savedPoints[1].y);
+         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
+                  savedPoints[2].x, savedPoints[2].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
+                  savedPoints[0].x, savedPoints[0].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+                 
+         fill(points);
+         
+         savedPoints.erase(savedPoints.begin());
+      }
+      else if (savedPoints.size() == 1 ||
+               savedPoints.size() == 2)
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
-   else if (glDrawMode == GL_TRIANGLE_FAN)//Draws a connected group of triangles. One triangle is defined for each vertex presented after the first two vertices. Vertices 1, n + 1, and n + 2 define triangle n.
+   else if (glDrawMode == GL_TRIANGLE_FAN || 
+            glDrawMode == GL_POLYGON)//Draws a connected group of triangles. One triangle is defined for each vertex presented after the first two vertices. Vertices 1, n + 1, and n + 2 define triangle n.
    {
+      int numPointsInTri = 3;
+      if (saveAndReachedPoints(numPointsInTri, x, y))
+      {
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+         
+         vector<Point> points;
+         vector<Point> temp;
+         
+         points = drawLine(savedPoints[0].x, savedPoints[0].y,
+                  savedPoints[1].x, savedPoints[1].y);
+         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
+                  savedPoints[2].x, savedPoints[2].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
+                  savedPoints[0].x, savedPoints[0].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+                 
+         fill(points);
+         
+         savedPoints.erase(savedPoints.begin()+1);
+      }
+      else if (savedPoints.size() == 1 ||
+               savedPoints.size() == 2)
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
    else if (glDrawMode == GL_QUADS)//A quadrilateral is defined for every four vertices 4n-3, 4n-2, 4n-1, 4n; each quadrilateral can be rendered directly or split into two triangles. You can assume the quad vertices are specified in an order that make them convex.
    {
+      int numPointsInTri = 4;
+      if (saveAndReachedPoints(numPointsInTri, x, y))
+      {
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+         
+         vector<Point> points;
+         vector<Point> temp;
+         
+         points = drawLine(savedPoints[0].x, savedPoints[0].y,
+                  savedPoints[1].x, savedPoints[1].y);
+         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
+                  savedPoints[2].x, savedPoints[2].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
+                  savedPoints[3].x, savedPoints[3].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+         temp   = drawLine(savedPoints[3].x, savedPoints[3].y,
+                  savedPoints[0].x, savedPoints[0].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+                 
+         fill(points);
+         
+         savedPoints.clear();
+      }
+      else if (savedPoints.size() == 1 ||
+               savedPoints.size() == 2 || 
+               savedPoints.size() == 3)
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
    else if (glDrawMode == GL_QUAD_STRIP)//A connected group of quadrilaterals, with one defined for every two vertices beyond the first two (if the first point is called 1, not 0, then for all n, the points 2n-1, 2n, 2n+2, 2n+1 make a quad); each quadrilateral can be rendered directly or split into two triangles. You can assume the quad strip vertices are given in an order that makes them convex. Note that the order in which vertices are used to construct a quadrilateral from strip data is different from that used with independent data.
    {
+      int numPointsInTri = 4;
+      if (saveAndReachedPoints(numPointsInTri, x, y))
+      {
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+         
+         vector<Point> points;
+         vector<Point> temp;
+         
+         points = drawLine(savedPoints[0].x, savedPoints[0].y,
+                  savedPoints[1].x, savedPoints[1].y);
+         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
+                  savedPoints[3].x, savedPoints[3].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+         temp   = drawLine(savedPoints[3].x, savedPoints[3].y,
+                  savedPoints[2].x, savedPoints[2].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
+                  savedPoints[0].x, savedPoints[0].y);
+         points.insert(points.end(), temp.begin(), temp.end());
+                 
+         fill(points);
+         
+         savedPoints.erase(savedPoints.begin());
+         savedPoints.erase(savedPoints.begin());
+      }
+      else if (savedPoints.size() == 1 ||
+               savedPoints.size() == 2 || 
+               savedPoints.size() == 3)
+         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
    else if (glDrawMode == GL_POLYGON)//see GL_TRIANGLE_FAN.
 	{
