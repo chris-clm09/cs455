@@ -31,6 +31,7 @@ vector3 penColor(0,0,0);
 float raster[RASTER_SIZE];
 GLenum glDrawMode;
 vector<Point> savedPoints;
+Point firstPt(-1,-1);
 
 int drawMode = 0;
 int mymode   = 0;
@@ -204,6 +205,7 @@ void clm_glBegin(GLenum eVar)
 {
    glBegin(eVar);
    glDrawMode = eVar;
+   firstPt.set(-1,-1);
    return;
 }
 
@@ -223,6 +225,25 @@ bool saveAndReachedPoints(int num, int x, int y)
       cout << "Error: Invalid number of saved Points.\n";	   
       exit(0);
    }
+}
+
+void drawStrip(int x, int y)
+{
+   if (savedPoints.size() == 0)
+   {
+      setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+      saveAndReachedPoints(2, x, y);
+   }
+   else
+   {
+      setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+      saveAndReachedPoints(2,x,y);
+      drawLine(savedPoints[0].x, savedPoints[0].y,
+               savedPoints[1].x, savedPoints[1].y);
+               
+      savedPoints.erase(savedPoints.begin());
+   }     
+   return;
 }
 
 /**********************************************************
@@ -280,21 +301,13 @@ void clm_glVertex2i(int x, int y)
 	}
    else if (glDrawMode == GL_LINE_STRIP)//Draws one line segment for every call to glVertex2i except the first; vertices n and n + 1 define line segment n.
    {
-      if (savedPoints.size() == 0)
-      {
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         saveAndReachedPoints(2, x, y);
-      }
-      else
-      {
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         drawLine(savedPoints[0].x, savedPoints[0].y,
-                  savedPoints[1].x, savedPoints[1].y);
-         savedPoints.erase(savedPoints.begin());
-      }                                                                                                     
+      drawStrip(x,y);                                                                                                
    }
    else if (glDrawMode == GL_LINE_LOOP)//Exactly like GL_LINE_STRIP except one additional line is draw between the first and last calls to glVertex2i when glEnd is called.
    {
+      if (firstPt.eq(Point(-1,-1)))
+         firstPt.set(x,y);
+      drawStrip(x,y);
    }
    else if (glDrawMode == GL_TRIANGLE_STRIP)//Draws a connected group of triangles. One triangle is defined for each vertex presented after the first two vertices. For odd n, vertices n, n + 1, and n + 2 define triangle n. For even n, vertices n + 1, n, and n + 2 define triangle n. The alternating order becomes important later when we add backface culling.
    {
@@ -327,7 +340,12 @@ works between Begin & End pairs.
 void clm_glEnd()
 {
    glEnd();
+   
+   if (glDrawMode == GL_LINE_LOOP)
+      drawStrip(firstPt.x, firstPt.y);
+   
    savedPoints.clear();
+   firstPt.set(-1,-1);
    //? Do we need to do somthing?????
    return;
 }
