@@ -1,4 +1,5 @@
 #include <math.h>
+#include <algorithm>
 #include <stdlib.h>
 #include <unistd.h>
 #include <GL/glut.h>   // The GL Utility Toolkit (Glut) Header
@@ -6,6 +7,7 @@
 #include "cml/cml.h"
 #include <vector>
 #include "point.h"
+#include "vectorfun.h"
 using namespace std;
 
 typedef cml::matrix44f_c matrix4;
@@ -34,7 +36,7 @@ int drawMode = 0;
 int mymode   = 0;
 
 void pp(vector3 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}
-
+void pp(Point p) {cout << p.x << "," << p.y << endl;}
 /**********************************************************
 This function will set a pixel in a line.
 **********************************************************/
@@ -121,27 +123,16 @@ vector<Point> drawLine(int xOne, int yOne, int xTwo, int yTwo)
 This function will fill in the area between two lines
 with interpolated color.
 **********************************************************/
-void fill(vector<Point> line1, vector<Point> line2)
+void fill(vector<Point> points)
 {
-   float rate      = (line2.size() - 1.0) / ((float)line1.size() - 1.0);
-   bool  direction = line1[0].eq(line2[0]); 
-
-   for (int i = 0; i < line1.size(); i++)
-      drawLine(line1[i].x, line1[i].y, 
-               line2[(unsigned int)ceil(
-               (direction ? i * rate : line2.size() - 1 - i * rate)
-               )].x , 
-               line2[(unsigned int)ceil(
-               (direction ? i * rate : line2.size() - 1 - i * rate)
-               )].y);
-   for (int i = 0; i < line1.size(); i++)
-      drawLine(line1[i].x, line1[i].y, 
-               line2[(unsigned int)floor(
-               (direction ? i * rate : line2.size() - 1 - i * rate)
-               )].x , 
-               line2[(unsigned int)floor(
-               (direction ? i * rate : line2.size() - 1 - i * rate)
-               )].y);
+   sort(points.begin(), points.end(), less_key());
+   cout << "fill:::\n\n";
+   
+   int min = getXMin(points);
+   int max = getXMax(points);
+   drawLine(min, points.back().y, max, points.back().y);
+   removeYBack(points);   
+   
    return;
 }
 
@@ -265,19 +256,19 @@ void clm_glVertex2i(int x, int y)
       {
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
          
-         vector<Point> lines[3];
+         vector<Point> points;
+         vector<Point> temp;
          
-         lines[0] = drawLine(savedPoints[0].x, savedPoints[0].y,
+         points = drawLine(savedPoints[0].x, savedPoints[0].y,
                   savedPoints[1].x, savedPoints[1].y);
-         lines[1] = drawLine(savedPoints[1].x, savedPoints[1].y,
+         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
                   savedPoints[2].x, savedPoints[2].y);
-         lines[2] = drawLine(savedPoints[2].x, savedPoints[2].y,
+         points.insert(points.end(), temp.begin(), temp.end());
+         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
                   savedPoints[0].x, savedPoints[0].y);
-         
-        fill(lines[0], lines[1]);
-        //fill(lines[1], lines[0]);
-        //fill(lines[1], lines[2]);
-        //fill(lines[2], lines[0]);
+         points.insert(points.end(), temp.begin(), temp.end());
+                 
+         fill(points);
          
          savedPoints.clear();
       }
@@ -360,16 +351,33 @@ void draw()
             clm_glBegin(GL_TRIANGLES);
             clm_glColor3f(1,0,0);
             clm_glVertex2i(300,300);
+           
             clm_glColor3f(0,1,0);
             clm_glVertex2i(600,300);
+           
             clm_glColor3f(0,0,1);
             clm_glVertex2i(450,410);
+           //2
             clm_glColor3f(1,1,0);
             clm_glVertex2i(100,400);
+            
             clm_glColor3f(0,1,1);
             clm_glVertex2i(70,60);
+            
             clm_glColor3f(1,0,1);
             clm_glVertex2i(350,100);
+            
+            //3
+            clm_glColor3f(1,1,0);
+            clm_glVertex2i(500,470);
+            
+            clm_glColor3f(0,1,1);
+            clm_glVertex2i(600,400);
+            
+            clm_glColor3f(1,0,1);
+            clm_glVertex2i(600,450);
+            
+            
             clm_glEnd();   
          break;   
       case 3:

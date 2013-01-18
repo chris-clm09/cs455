@@ -65,9 +65,7 @@ vector3 interpolateColor(vector3 COLOR1, vector3 COLOR2, float fraction)
    red   *= 255;
    blue  *= 255;
    green *= 255;
-   vector3 ans = vector3(red, green, blue);
-   if (ans == vector3(0,0,0))
-      cout << "HOW DID THIS HAPPEN?\n";
-   return ans;        
+
+   return vector3(red, green, blue);        
 }
 
