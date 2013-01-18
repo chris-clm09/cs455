@@ -134,7 +134,6 @@ void fill(vector<Point> points)
       drawLine(min, points.back().y, max, points.back().y);
       removeYBack(points);   
    }
-   
    return;
 }
 
