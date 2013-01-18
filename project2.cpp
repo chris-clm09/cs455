@@ -126,12 +126,14 @@ with interpolated color.
 void fill(vector<Point> points)
 {
    sort(points.begin(), points.end(), less_key());
-   cout << "fill:::\n\n";
    
-   int min = getXMin(points);
-   int max = getXMax(points);
-   drawLine(min, points.back().y, max, points.back().y);
-   removeYBack(points);   
+   while (points.size() > 0)
+   {
+      int min = getXMin(points);
+      int max = getXMax(points);
+      drawLine(min, points.back().y, max, points.back().y);
+      removeYBack(points);   
+   }
    
    return;
 }

@@ -22,7 +22,7 @@ This function will find a vetor's back y's max x.
 ***************************************************************/
 int getXMax(vector<Point> pts)
 {
-   int max = pts.back().y;
+   int max = pts.back().x;
    
    for (int i = pts.size() - 1; i >= 0 && pts[i].y == pts.back().y; i--)
       if (pts[i].x > max)
