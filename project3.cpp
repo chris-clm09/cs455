@@ -39,6 +39,7 @@ int mymode   = 0;
 
 void pp(vector3 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}
 void pp(Point p) {cout << p.x << "," << p.y << endl;}
+
 /**********************************************************
 This function will set a pixel in a line.
 **********************************************************/
@@ -248,6 +249,9 @@ bool saveAndReachedPoints(int num, int x, int y)
 }
 
 
+/**********************************************************
+Draws a strip between two points.
+**********************************************************/
 void drawStrip(int x, int y)
 {
    if (savedPoints.size() == 0)
@@ -389,7 +393,7 @@ void clm_glVertex2i(int x, int y)
                savedPoints.size() == 2)
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
-   else if (glDrawMode == GL_QUADS)//A quadrilateral is defined for every four vertices 4n-3, 4n-2, 4n-1, 4n; each quadrilateral can be rendered directly or split into two triangles. You can assume the quad vertices are specified in an order that make them convex.
+   else if (glDrawMode == GL_QUADS)
    {
       int numPointsInTri = 4;
       if (saveAndReachedPoints(numPointsInTri, x, y))
@@ -420,7 +424,7 @@ void clm_glVertex2i(int x, int y)
                savedPoints.size() == 3)
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
-   else if (glDrawMode == GL_QUAD_STRIP)//A connected group of quadrilaterals, with one defined for every two vertices beyond the first two (if the first point is called 1, not 0, then for all n, the points 2n-1, 2n, 2n+2, 2n+1 make a quad); each quadrilateral can be rendered directly or split into two triangles. You can assume the quad strip vertices are given in an order that makes them convex. Note that the order in which vertices are used to construct a quadrilateral from strip data is different from that used with independent data.
+   else if (glDrawMode == GL_QUAD_STRIP)
    {
       int numPointsInTri = 4;
       if (saveAndReachedPoints(numPointsInTri, x, y))
@@ -500,6 +504,114 @@ void clm_glLineWidth(int lwidth)
    lineWidth = lwidth;
    return;
 }
+
+
+
+
+
+
+
+
+/**********************************************************
+* glMatrixMode(GLenum)
+* Rather than separate calls to change different matrices, 
+* OpenGL has only one set of matrix modification calls 
+* which change whichever matrix was last specified by a 
+* call to glMatrixMode.
+* Modes == GL_MODELVIEW and GL_PROJECTION
+**********************************************************/
+void clm_glMatrixMode(GLenum mode)
+{
+   return;
+}
+
+/**********************************************************
+* glViewprot(x,y,width,height)
+* Specifies the active viewport—that is, the rectangle of 
+* pixels OpenGL should render to.
+**********************************************************/
+void clm_glViewport(int x , int y, int width, int height)
+{
+   return;
+}
+
+/**********************************************************
+* glPushMatrix  pushes  the current matrix stack down by one, 
+* duplicating the current matrix.  That is, after a 
+* glPushMatrix call, the matrix  on top of the stack is 
+* identical to the one below it.
+**********************************************************/
+void clm_glPushMatrix()
+{
+   return;
+}
+
+/**********************************************************
+* glPopMatrix pops the current matrix stack, replacing the 
+* current matrix with the one below it on the stack.
+**********************************************************/
+void clm_glPopMatrix()
+{
+   return ;
+}
+
+/**********************************************************
+* Calls flVertex4f with z=0.
+**********************************************************/
+void clm_glVertex3f(float x, float y, float z) 
+{glVertex4f(x,y,z,1);}
+
+/**********************************************************
+* Specifies a four vector point.
+**********************************************************/
+void clm_glVertex4f(float x, float y, float z, float w)
+{
+   return;
+}
+
+/**********************************************************
+* glLoadIdentity replaces the current matrix with the 
+* identity matrix. It is semantically equivalent to calling 
+* glLoadMatrix with the identity matrix.
+**********************************************************/
+void clm_glLoadIdentity()
+{
+   return;
+}
+
+/**********************************************************
+* replaces  the  current matrix with the one whose elements
+* are specified by m.  The current matrix is the projection 
+* matrix,  modelview  matrix, or texture matrix, depending 
+* on the current matrix mode (see glMatrixMode).
+**********************************************************/
+void clm_glLoadMatrixd(double m[])
+{
+   return;
+}
+
+/**********************************************************
+* multiplies the current matrix with the one specified using
+* m, and replaces the current matrix with the product.
+**********************************************************/
+void clm_glMultMatrixd(double m[])
+{
+   return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**********************************************************
 * Draw will call all of my byu functions, which will
@@ -786,7 +898,7 @@ void initRaster()
 }
 
 /**********************************************************
-*
+* 
 **********************************************************/
 void init ()
 {
