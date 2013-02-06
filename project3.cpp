@@ -11,13 +11,12 @@
 using namespace std;
 
 typedef cml::matrix44f_c matrix4;
-typedef cml::vector3f vector3;
 typedef cml::vector4f vector4;
 #include "ColorInterpolation.h"
 
 //---------------------Forward Declarations----------------
 void setPixel(int x, int y, double r, double g, double b);
-vector3 getPixelColor(int x, int y);
+vector4 getPixelColor(int x, int y);
 
 /**********************************************************
 * // GLOBAL CRAP
@@ -26,8 +25,8 @@ const int SCREEN_HEIGHT = 480;
 const int SCREEN_WIDTH  = 640;
 const int RASTER_SIZE   = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
 
-vector3 clearColor(0,0,0);
-vector3 penColor(0,0,0);
+vector4 clearColor(0,0,0,0);
+vector4 penColor(0,0,0,0);
 float raster[RASTER_SIZE];
 GLenum glDrawMode;
 vector<Point> savedPoints;
@@ -37,7 +36,7 @@ int lineWidth = 1;
 int drawMode = 0;
 int mymode   = 0;
 
-void pp(vector3 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}
+void pp(vector4 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}
 void pp(Point p) {cout << p.x << "," << p.y << endl;}
 
 /**********************************************************
@@ -46,7 +45,7 @@ This function will set a pixel in a line.
 void setLinePixel(int xOne, int yOne, int xTwo, int yTwo,
                   float cX, float cY)
 {
-   vector3 theColor = interpolateColor( getPixelColor(xOne,yOne),
+   vector4 theColor = interpolateColor( getPixelColor(xOne,yOne),
                                         getPixelColor(xTwo,yTwo),
                                         getFraction(xOne, yOne,
                                                     xTwo, yTwo,
@@ -165,7 +164,7 @@ Sets the clear color.
 void clm_glClearColor(float r, float g, float b, float a)
 {
    glClearColor(r, g, b, a);
-   clearColor.set(r, g, b);
+   clearColor.set(r, g, b, a);
    return;
 }
 
@@ -184,18 +183,19 @@ void setPixel(int x, int y, double r, double g, double b)
 /**********************************************************
 This function will return the color of a pixel.
 **********************************************************/
-vector3 getPixelColor(int x, int y)
+vector4 getPixelColor(int x, int y)
 {
    int temp = ((y * SCREEN_WIDTH) + x) * 3;
-   return vector3(raster[ temp + 0 ],
+   return vector4(raster[ temp + 0 ],
                   raster[ temp + 1 ],
-                  raster[ temp + 2 ]); 
+                  raster[ temp + 2 ],
+                  1.0); 
 }
 
 /**********************************************************
 Fill raster via color.
 **********************************************************/
-void fillRasterWColor(vector3 color)
+void fillRasterWColor(vector4 color)
 {
    for (int x = 0; x < SCREEN_WIDTH; x++)
       for (int y = 0; y < SCREEN_HEIGHT; y++)
@@ -210,10 +210,13 @@ Clears the entire screen to the clear color.
 void clm_glClear(GLint bit)
 {
    glClear(bit);
+  
    // Clear the Raster
    if (bit != 0)
       fillRasterWColor(clearColor);
-           
+   else
+      //TODO:: Clear Viewport only.
+                
    return;
 }
 
@@ -456,7 +459,7 @@ void clm_glVertex2i(int x, int y)
                savedPoints.size() == 3)
          setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
-   else if (true)
+   else
 	{
 	   cout << "Holly Crap!" << endl;
 	   exit(0);
@@ -478,7 +481,6 @@ void clm_glEnd()
    
    savedPoints.clear();
    firstPt.set(-1,-1);
-   //? Do we need to do somthing?????
    return;
 }
 
@@ -490,7 +492,7 @@ glColor3f(r,g,b) sets it to (r,g,b,1).
 void clm_glColor3f(double r, double g, double b)
 {
    glColor3f(r, g, b);
-   penColor.set(r, g, b);
+   penColor.set(r, g, b, 1.0);
    return;
 }
 
@@ -504,6 +506,8 @@ void clm_glLineWidth(int lwidth)
    lineWidth = lwidth;
    return;
 }
+
+
 
 
 
@@ -935,7 +939,6 @@ void reshape ( int w, int h )
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glOrtho(0,640, 0,480, -1,1); // only for project 2; delete thereafter!
 }
 
 /**********************************************************

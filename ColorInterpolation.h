@@ -32,7 +32,7 @@ float getFraction(int sx, int sy,
 * http://harmoniccode.blogspot.com/2011/04/bilinear-
 * color-interpolation.html
 **********************************************************/
-vector3 interpolateColor(vector3 COLOR1, vector3 COLOR2, float fraction)
+vector4 interpolateColor(vector4 COLOR1, vector4 COLOR2, float fraction)
 {            
    const float INT_TO_FLOAT_CONST = 1.0f / 255.0f;
    
@@ -66,6 +66,6 @@ vector3 interpolateColor(vector3 COLOR1, vector3 COLOR2, float fraction)
    blue  *= 255;
    green *= 255;
 
-   return vector3(red, green, blue);        
+   return vector4(red, green, blue, 1.0);        
 }
 
