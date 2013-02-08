@@ -641,52 +641,63 @@ void clm_glMultMatrixd(const double * m)
 }
 
 /**********************************************************
-*
+* Enable
 **********************************************************/
-void clm_glEnable(...)
+void clm_glEnable(GLenum mask)
 { 
+   glEnable(mask);
+   
    return;
 }
 
 /**********************************************************
-*
+* Disable
 **********************************************************/
-void clm_glDisable(...)
+void clm_glDisable(GLenum mask)
 {
+   glDisable(mask);
    return;
 }
 
 /**********************************************************
-*
+*  multiply the current matrix by a rotation matrix
 **********************************************************/
-void clm_glRotatef(...)
+void clm_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
+   glRotatef(angle,x,y,z);
+   
    return;
 }
 
 /**********************************************************
-*
+*  multiply the current matrix by a translation matrix
 **********************************************************/
-void clm_glTranslatef(...)
+void clm_glTranslatef(GLfloat x, GLfloat y, GLfloat z)
 {
+   glTranslatef(x,y,z);
    return;
 }
 
 /**********************************************************
-*
+* multiply the current matrix by a general scaling matrix
 **********************************************************/
-void clm_glScalef(...)
+void clm_glScalef(GLfloat x, GLfloat y, GLfloat z)
 {
+   glScalef(x,y,z);
    return;
 }
 
 /**********************************************************
-*
+* multiply the current matrix with an orthographic matrix
 **********************************************************/
-void clm_glOrtho(...)
+void clm_glOrtho(GLdouble left, GLdouble right, GLdouble bottom, 
+                 GLdouble top,  GLdouble zNear, GLdouble zFar)
 {
+   glOrtho(left, right, bottom, top, zNear, zFar);
    return;
 }
+
+
 
 
 
