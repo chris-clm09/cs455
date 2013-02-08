@@ -640,6 +640,53 @@ void clm_glMultMatrixd(const double * m)
    return;
 }
 
+/**********************************************************
+*
+**********************************************************/
+void clm_glEnable(...)
+{ 
+   return;
+}
+
+/**********************************************************
+*
+**********************************************************/
+void clm_glDisable(...)
+{
+   return;
+}
+
+/**********************************************************
+*
+**********************************************************/
+void clm_glRotatef(...)
+{
+   return;
+}
+
+/**********************************************************
+*
+**********************************************************/
+void clm_glTranslatef(...)
+{
+   return;
+}
+
+/**********************************************************
+*
+**********************************************************/
+void clm_glScalef(...)
+{
+   return;
+}
+
+/**********************************************************
+*
+**********************************************************/
+void clm_glOrtho(...)
+{
+   return;
+}
 
 
 
@@ -653,6 +700,7 @@ void draw()
 {
    clm_glClearColor(0,0,0,1);
    clm_glClear(GL_COLOR_BUFFER_BIT);
+   clm_glClear(GL_DEPTH_BUFFER_BIT);
    
    switch (drawMode)
    {
@@ -687,7 +735,7 @@ void draw()
          clm_glEnd();
          break;
       case 2:
-         glEnable(GL_DEPTH_TEST);
+         clm_glEnable(GL_DEPTH_TEST);
          clm_glBegin(GL_TRIANGLES);
            clm_glColor3f(0,1,1);
            clm_glVertex3f(-0.5,0.2,0.5);
@@ -698,10 +746,10 @@ void draw()
            clm_glVertex3f(0,0.5,0);
            clm_glVertex3f(0.5,-0.2,0.5);
          clm_glEnd();
-         glDisable(GL_DEPTH_TEST);
+         clm_glDisable(GL_DEPTH_TEST);
          break;   
       case 3:
-         glEnable(GL_DEPTH_TEST);
+         clm_glEnable(GL_DEPTH_TEST);
          clm_glBegin(GL_TRIANGLES);
            clm_glColor3f(0.5,1,1);
            clm_glVertex3f(0.5,0,0);
@@ -717,7 +765,7 @@ void draw()
          clm_glEnd();
          //Restore your viewport to the whole screen
          clm_glViewport(0,0,640,480);
-         glDisable(GL_DEPTH_TEST);
+         clm_glDisable(GL_DEPTH_TEST);
          break;
       case 4:
       {
@@ -758,27 +806,77 @@ void draw()
          }
          break;
       case 5:
-      
-      glEnable(GL_DEPTH_TEST);
-glBegin(GL_TRIANGLES);
-  glColor3f(0,1,1);
-  glVertex3f(-0.5,0.2,0.5);
-  glVertex3f(0,-0.5,0);
-  glVertex3f(0.5,0.2,-0.5);
-  glColor3f(1,1,0);
-  glVertex3f(-0.5,-0.2,-0.5);
-  glVertex3f(0,0.5,0);
-  glVertex3f(0.5,-0.2,0.5);
-glEnd();
+         matrixTest();      
          break;
       case 6:
-      matrixTest();
+         //glRotate:
+         clm_glLoadIdentity();
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.5,0.2,1);
+           clm_glVertex3f(0.5,0.1,0);
+           clm_glVertex3f(0.8,0.1,0);
+           clm_glVertex3f(0.65,0.4,0);
+         clm_glEnd();
+         clm_glRotatef(90,0,0,1);
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.1,0.2,1);
+           clm_glVertex3f(0.5,0.1,0);
+           clm_glVertex3f(0.8,0.1,0);
+           clm_glVertex3f(0.65,0.4,0);
+         clm_glEnd();
          break;
       case 7:
+         //glTranslate:
+         clm_glLoadIdentity();
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.33,0.77,0);
+           clm_glVertex3f(0.5,0.1,0);
+           clm_glVertex3f(0.8,0.1,0);
+           clm_glVertex3f(0.65,0.4,0);
+         clm_glEnd();
+         clm_glTranslatef(-1,-1,0);
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.77,0.2,0.3);
+           clm_glVertex3f(0.5,0.1,0);
+           clm_glVertex3f(0.8,0.1,0);
+           clm_glVertex3f(0.65,0.4,0);
+         clm_glEnd();
          break;
       case 8:
+         //glScale:
+         clm_glLoadIdentity();
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.9,0.5,1);
+           clm_glVertex3f(0.5,0.4,0);
+           clm_glVertex3f(0.8,0.4,0);
+           clm_glVertex3f(0.65,0.9,0);
+         clm_glEnd();
+         clm_glScalef(0.8,0.7,1);
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.8,0.7,0);
+           clm_glVertex3f(0.5,0.1,0);
+           clm_glVertex3f(0.8,0.1,0);
+           clm_glVertex3f(0.65,0.4,0);
+         clm_glEnd();
          break;
       case 9:
+         //glOrtho:
+         clm_glLoadIdentity();
+         clm_glOrtho(0,640,0,480,-1,1);
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(1,0,0);
+           clm_glVertex3f(300,300,0);
+           clm_glColor3f(0,1,0);
+           clm_glVertex3f(600,300,0);
+           clm_glColor3f(0,0,1);
+           clm_glVertex3f(450,410,0);
+           clm_glColor3f(1,1,0);
+           clm_glVertex3f(100,400,0);
+           clm_glColor3f(0,1,1);
+           clm_glVertex3f(70,60,0);
+           clm_glColor3f(1,0,1);
+           clm_glVertex3f(350,100,0);
+         clm_glEnd();
          break;   
       case 10:
          break;
@@ -843,7 +941,7 @@ void init ()
    glEnable(GL_DEPTH_TEST);			// Enables Depth Testing
    glDepthFunc(GL_LEQUAL);				// The Type Of Depth Testing To Do
    glEnable(GL_COLOR_MATERIAL);
-   glEnable( GL_POINT_SMOOTH );
+   //glEnable( GL_POINT_SMOOTH );
    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 

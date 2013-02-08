@@ -17,5 +17,6 @@ void tree(int depth) {
    clm_glPopMatrix();
 }
 void matrixTest() {
+  clm_glColor3f(0,255,255);
   tree(8);
 }
