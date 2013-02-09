@@ -912,8 +912,8 @@ void mydraw()
       GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
       glDisable(GL_DEPTH_TEST);
       glGetIntegerv(GL_MATRIX_MODE,&oldmatrixmode);
-      glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
-      glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
+      clm_glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
+      clm_glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
       
       // Draw the array of pixels (This is where you draw the values
       // you have stored in the array 'raster')
@@ -922,8 +922,8 @@ void mydraw()
       
       //Set the state back to what it was
       glPopMatrix();
-      glMatrixMode(GL_MODELVIEW); glPopMatrix();
-      glMatrixMode(oldmatrixmode);
+      clm_glMatrixMode(GL_MODELVIEW); glPopMatrix();
+      clm_glMatrixMode(oldmatrixmode);
       if (depthWasEnabled)
         glEnable(GL_DEPTH_TEST);
    }
@@ -975,9 +975,9 @@ void display ( void )   // Create The Display Function
 void reshape ( int w, int h )   
 {
 	glViewport( 0, 0, w, h );
-	glMatrixMode(GL_PROJECTION);
+	clm_glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
+	clm_glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
 
