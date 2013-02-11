@@ -1,49 +1,4 @@
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <algorithm>
-#include <stdlib.h>
-#include <unistd.h>
-#include <GL/glut.h>   // The GL Utility Toolkit (Glut) Header
-#include <iostream>
-#include "cml/cml.h"
-#include <vector>
-#include "point.h"
-#include "vectorfun.h"
-using namespace std;
-
-typedef cml::matrix44f_c matrix4;
-typedef cml::vector4f vector4;
-#include "ColorInterpolation.h"
-
-//---------------------Forward Declarations----------------
-void setPixel(int x, int y, double r, double g, double b);
-vector4 getPixelColor(int x, int y);
-
-/**********************************************************
-* // GLOBAL CRAP
-**********************************************************/
-const int SCREEN_HEIGHT = 480;
-const int SCREEN_WIDTH  = 640;
-const int RASTER_SIZE   = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
-
-vector4 clearColor(0,0,0,0);
-vector4 penColor(0,0,0,0);
-float raster[RASTER_SIZE];
-GLenum glDrawMode;
-vector<Point> savedPoints;
-Point firstPt(-1,-1);
-int lineWidth = 1;
-
-int drawMode = 0;
-int mymode   = 0;
-
-
-
-//-------------------PRINT CRAP--------------------------------------
-void pp(vector4 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}
-void pp(Point p) {cout << p.x << "," << p.y << endl;}
-
-
+#include "project3.h"
 
 /**********************************************************
 A simple rounding function.
@@ -59,11 +14,8 @@ void setLinePixel(int xOne, int yOne, int xTwo, int yTwo,
 {
    vector4 theColor = interpolateColor( getPixelColor(xOne,yOne),
                                         getPixelColor(xTwo,yTwo),
-                                        getFraction(xOne, yOne,
-                                                    xTwo, yTwo,
-                                                    cX, cY));
-   setPixel(cX, cY, 
-	         theColor[0], theColor[1], theColor[2]);      
+                    getFraction(xOne, yOne, xTwo, yTwo, cX, cY));
+   setPixel(cX, cY, theColor[0], theColor[1], theColor[2]);      
    return;
 }                  
 
@@ -482,18 +434,6 @@ void clm_glVertex2i(int x, int y)
 }
 
 /**********************************************************
-Rounds x and y and calls Vertex2i
-**********************************************************/
-void clm_glVertex2f(double x, double y)
-{
-   glVertex2f(x, y);
-   
-   //TODO:: Do something smart ...
-   clm_glVertex2i(x, y);
-}
-
-
-/**********************************************************
 There must be one glEnd for every glBegin. glVertex only 
 works between Begin & End pairs.
 **********************************************************/
@@ -537,6 +477,18 @@ void clm_glLineWidth(int lwidth)
 
 
 /**********************************************************
+* This function will generate a new matrix based off of
+* an array.
+**********************************************************/
+matrix4 createMatrix(const double* m)
+{  
+   return matrix4(m[0],  m[1],  m[2],  m[3],
+                  m[4],  m[5],  m[6],  m[7],
+                  m[8],  m[9],  m[10], m[11],
+                  m[12], m[13], m[14], m[15]);
+}
+
+/**********************************************************
 * glMatrixMode(GLenum)
 * Rather than separate calls to change different matrices, 
 * OpenGL has only one set of matrix modification calls 
@@ -547,8 +499,19 @@ void clm_glLineWidth(int lwidth)
 void clm_glMatrixMode(GLenum mode)
 {
    glMatrixMode(mode);
-   
-   
+
+   switch (mode)
+   {
+      case GL_MODELVIEW:
+         currentMatrixStack = &(matrixStacks[0]);         
+         break;
+      case GL_PROJECTION:
+         currentMatrixStack = &(matrixStacks[1]);
+         break;
+      default:
+         cout << "Warning: clm_glMatrixMode Unknow mode type.\n";
+         break;
+   }
    return;
 }
 
@@ -560,7 +523,7 @@ void clm_glMatrixMode(GLenum mode)
 void clm_glViewport(int x , int y, int width, int height)
 {
    glViewport(x, y, width, height);
-   
+   viewport.set(x,y,width,height);
    return;
 }
 
@@ -573,7 +536,8 @@ void clm_glViewport(int x , int y, int width, int height)
 void clm_glPushMatrix()
 {
    glPushMatrix();
-   
+   matrix4 m = currentMatrixStack->back();
+   currentMatrixStack->push_back(m);
    return;
 }
 
@@ -584,8 +548,21 @@ void clm_glPushMatrix()
 void clm_glPopMatrix()
 {
    glPopMatrix();
-   
-   return ;
+   if (currentMatrixStack->size() > 1)
+      currentMatrixStack->pop_back();
+   else
+      cout << "Warning: You tried to pop the matrix stack w/ Size == 1\n";
+      
+   return;
+}
+
+/**********************************************************
+* Rounds x and y and calls Vertex2i
+**********************************************************/
+void clm_glVertex2f(double x, double y)
+{
+   glVertex2f(x, y);
+   clm_glVertex2i(round(x), round(y));
 }
 
 /**********************************************************
@@ -600,7 +577,7 @@ void clm_glVertex3f(float x, float y, float z)
 void clm_glVertex4f(float x, float y, float z, float w)
 {
    glVertex4f(x, y, z, w);
-   
+   //TODO
    return;
 }
 
@@ -612,7 +589,7 @@ void clm_glVertex4f(float x, float y, float z, float w)
 void clm_glLoadIdentity()
 {
    glLoadIdentity();
-   
+   currentMatrixStack->push_back(identityMatrix);
    return;
 }
 
@@ -625,7 +602,7 @@ void clm_glLoadIdentity()
 void clm_glLoadMatrixd(const double * m)
 {
    glLoadMatrixd(m);
-   
+   currentMatrixStack->push_back(createMatrix(m));
    return;
 }
 
@@ -636,7 +613,7 @@ void clm_glLoadMatrixd(const double * m)
 void clm_glMultMatrixd(const double * m)
 {
    glMultMatrixd(m);
-   
+   (*currentMatrixStack)[currentMatrixStack->size() - 1] *= createMatrix(m);
    return;
 }
 
@@ -712,7 +689,7 @@ void draw()
    clm_glClearColor(0,0,0,1);
    clm_glClear(GL_COLOR_BUFFER_BIT);
    clm_glClear(GL_DEPTH_BUFFER_BIT);
-   
+
    switch (drawMode)
    {
       case 0:
@@ -910,7 +887,7 @@ void mydraw()
       // Save the old state so that you can set it back after you draw
       GLint oldmatrixmode;
       GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
-      glDisable(GL_DEPTH_TEST);
+      clm_glDisable(GL_DEPTH_TEST);
       glGetIntegerv(GL_MATRIX_MODE,&oldmatrixmode);
       clm_glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
       clm_glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
@@ -925,7 +902,7 @@ void mydraw()
       clm_glMatrixMode(GL_MODELVIEW); glPopMatrix();
       clm_glMatrixMode(oldmatrixmode);
       if (depthWasEnabled)
-        glEnable(GL_DEPTH_TEST);
+        clm_glEnable(GL_DEPTH_TEST);
    }
    return;
 }
@@ -942,16 +919,29 @@ void initRaster()
 }
 
 /**********************************************************
+* Initalizes clm_'s matrix stacks.
+**********************************************************/
+void initMatrixStacks()
+{
+   clm_glMatrixMode(GL_PROJECTION);
+	clm_glLoadIdentity();
+	clm_glMatrixMode(GL_MODELVIEW);
+	clm_glLoadIdentity();
+   return;
+}
+
+/**********************************************************
 * 
 **********************************************************/
 void init ()
 {
    initRaster();
+   initMatrixStacks();
    glShadeModel(GL_SMOOTH);			// Enable Smooth Shading
    glClearDepth(1.0f);					// Depth Buffer Setup
-   glEnable(GL_DEPTH_TEST);			// Enables Depth Testing
+   clm_glEnable(GL_DEPTH_TEST);			// Enables Depth Testing
    glDepthFunc(GL_LEQUAL);				// The Type Of Depth Testing To Do
-   glEnable(GL_COLOR_MATERIAL);
+   clm_glEnable(GL_COLOR_MATERIAL);
    //glEnable( GL_POINT_SMOOTH );
    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
@@ -974,11 +964,11 @@ void display ( void )   // Create The Display Function
 // Create The Reshape Function (the viewport)
 void reshape ( int w, int h )   
 {
-	glViewport( 0, 0, w, h );
+	clm_glViewport( 0, 0, w, h );
 	clm_glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	clm_glLoadIdentity();
 	clm_glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	clm_glLoadIdentity();
 }
 
 /**********************************************************
