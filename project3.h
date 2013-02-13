@@ -34,8 +34,9 @@ vector<Point> savedPoints;
 Point firstPt(-1,-1);
 int lineWidth = 1;
 
-int drawMode = 0;
-int mymode   = 0;
+int drawMode    = 0;
+int mymode      = 0;
+bool depth_test = false;
 
 //-----------------------------------------------------
 //Matricies Stacks

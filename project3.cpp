@@ -482,10 +482,10 @@ void clm_glLineWidth(int lwidth)
 **********************************************************/
 matrix4 createMatrix(const double* m)
 {  
-   return matrix4(m[0],  m[1],  m[2],  m[3],
-                  m[4],  m[5],  m[6],  m[7],
-                  m[8],  m[9],  m[10], m[11],
-                  m[12], m[13], m[14], m[15]);
+   return matrix4(m[0], m[4], m[8],  m[12],
+                  m[1], m[5], m[9],  m[13],
+                  m[2], m[6], m[10], m[14],
+                  m[3], m[7], m[11], m[15]);
 }
 
 /**********************************************************
@@ -557,28 +557,28 @@ void clm_glPopMatrix()
 }
 
 /**********************************************************
-* Rounds x and y and calls Vertex2i
+* Specifies a four vector point.
 **********************************************************/
-void clm_glVertex2f(double x, double y)
+void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
 {
-   glVertex2f(x, y);
-   clm_glVertex2i(round(x), round(y));
+   glVertex4f(x, y, z, w);
+   //TODO
+   return;
 }
 
 /**********************************************************
 * Calls flVertex4f with z=0.
 **********************************************************/
-void clm_glVertex3f(float x, float y, float z) 
-{glVertex4f(x,y,z,1);}
+void clm_glVertex3f(float x, float y, float z=0) 
+{clm_glVertex4f(x,y,z);}
 
 /**********************************************************
-* Specifies a four vector point.
+* Rounds x and y and calls Vertex2i
 **********************************************************/
-void clm_glVertex4f(float x, float y, float z, float w)
+void clm_glVertex2f(double x, double y)
 {
-   glVertex4f(x, y, z, w);
-   //TODO
-   return;
+   glVertex2f(x, y);
+   clm_glVertex4f(x, y);
 }
 
 /**********************************************************
@@ -610,10 +610,20 @@ void clm_glLoadMatrixd(const double * m)
 * multiplies the current matrix with the one specified using
 * m, and replaces the current matrix with the product.
 **********************************************************/
+void multMatrix(const matrix4& m)
+{
+   (*currentMatrixStack)[currentMatrixStack->size() - 1] *= m;
+   return;
+}
+
+/**********************************************************
+* multiplies the current matrix with the one specified using
+* m, and replaces the current matrix with the product.
+**********************************************************/
 void clm_glMultMatrixd(const double * m)
 {
    glMultMatrixd(m);
-   (*currentMatrixStack)[currentMatrixStack->size() - 1] *= createMatrix(m);
+   multMatrix(createMatrix(m));
    return;
 }
 
@@ -624,6 +634,9 @@ void clm_glEnable(GLenum mask)
 { 
    glEnable(mask);
    
+   if (mask & GL_DEPTH_TEST)
+      depth_test = true;
+   
    return;
 }
 
@@ -633,7 +646,23 @@ void clm_glEnable(GLenum mask)
 void clm_glDisable(GLenum mask)
 {
    glDisable(mask);
+   
+   if (mask & GL_DEPTH_TEST)
+      depth_test = false;
+   
    return;
+}
+
+/**********************************************************
+* This function will return if a four vector is a unit
+* vector.
+**********************************************************/
+inline bool isUnitVector(const vector4& v)
+{
+   return 1 == sqrt(v[0]*v[0] +
+                    v[1]*v[1] +
+                    v[2]*v[2] +
+                    v[3]*v[3]);
 }
 
 /**********************************************************
@@ -643,6 +672,17 @@ void clm_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
    glRotatef(angle,x,y,z);
    
+   double s = sin(angle);
+   double c = cos(angle);
+   
+   //TODO Normalize x,y,z if not normalized
+   
+   matrix4 m(pow(x,2)*(1-c)+c,  x*y*(1-c)-z*s,     x*z*(1-c)+y*s,     0,
+             y*x*(1-c)+z*s,     pow(y,2)*(1-c)+c,  y*z*(1-c)-x*s,     0,
+             x*z*(1-c)-y*s,     y*z*(1-c)+x*s,     pow(z,2)*(1-c)+c,  0,
+                  0,                    0,                0,          1);
+   
+   multMatrix(m);
    return;
 }
 
@@ -652,6 +692,13 @@ void clm_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 void clm_glTranslatef(GLfloat x, GLfloat y, GLfloat z)
 {
    glTranslatef(x,y,z);
+   
+   matrix4 m(1, 0, 0, x,
+             0, 1, 0, y,
+             0, 0, 1, z,
+             0, 0, 0, 1);
+             
+   multMatrix(m);
    return;
 }
 
@@ -661,6 +708,13 @@ void clm_glTranslatef(GLfloat x, GLfloat y, GLfloat z)
 void clm_glScalef(GLfloat x, GLfloat y, GLfloat z)
 {
    glScalef(x,y,z);
+
+   matrix4 m(x, 0, 0, 0,
+             0, y, 0, 0, 
+             0, 0, z, 0,
+             0, 0, 0, 1);
+
+   multMatrix(m);
    return;
 }
 
@@ -687,8 +741,8 @@ void clm_glOrtho(GLdouble left, GLdouble right, GLdouble bottom,
 void draw()
 {
    clm_glClearColor(0,0,0,1);
-   clm_glClear(GL_COLOR_BUFFER_BIT);
-   clm_glClear(GL_DEPTH_BUFFER_BIT);
+   clm_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   //clm_glClear(GL_DEPTH_BUFFER_BIT);
 
    switch (drawMode)
    {
