@@ -136,7 +136,13 @@ void clm_glClearColor(float r, float g, float b, float a)
 This function will set the color of a pixel.
 **********************************************************/
 void setPixel(int x, int y, double r, double g, double b)
-{
+{ 
+   //Check if point is in screen and viewport   
+   if (x > SCREEN_WIDTH || y > SCREEN_HEIGHT || x < 0 || y < 0
+     ||x > viewport[0] + viewport[2] || x < viewport[0]
+     ||y > viewport[1] + viewport[3] || y < viewport[1])
+     return;
+     
    int temp = ((y * SCREEN_WIDTH) + x) * 3;
    raster[ temp + 0 ] = r;
    raster[ temp + 1 ] = g;
@@ -159,10 +165,11 @@ vector4 getPixelColor(int x, int y)
 /**********************************************************
 Fill raster via color.
 **********************************************************/
-void fillRasterWColor(vector4 color)
+void fillRasterWColor(vector4 color, int x_start = 0, int x_max = SCREEN_WIDTH 
+                                   , int y_start = 0, int y_max = SCREEN_HEIGHT)
 {
-   for (int x = 0; x < SCREEN_WIDTH; x++)
-      for (int y = 0; y < SCREEN_HEIGHT; y++)
+   for (int x = x_start; x < x_max; x++)
+      for (int y = y_start; y < y_max; y++)
          setPixel(x, y, color[0], color[1], color[2]);
          
    return;
@@ -175,11 +182,11 @@ void clm_glClear(GLint bit)
 {
    glClear(bit);
   
-   // Clear the Raster
-   if (bit != 0)
-      fillRasterWColor(clearColor);
-   else
-      //TODO:: Clear Viewport only.
+   if (bit & GL_DEPTH_BUFFER_BIT)
+      initZBuffer();
+   
+   fillRasterWColor(clearColor, viewport[0], viewport[2],
+                                viewport[1], viewport[3]);
                 
    return;
 }
@@ -238,17 +245,11 @@ void drawStrip(int x, int y)
    return;
 }
 
-
 /**********************************************************
-glVertex specifies a point for drawing, though how it is 
-drawn depends on the mode specified by glBegin. 
-glVertex2i(x,y) specifies the 4-vector point (x,y,0,1).
-//, plus possibly other glVertex calls
+* Set's raster pixels given current drawing mode.
 **********************************************************/
-void clm_glVertex2i(int x, int y)
+void vertex2i(int x, int y)
 {
-   glVertex2i(x,y);
-   
    if (glDrawMode == GL_POINTS) 
       setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    else if (glDrawMode == GL_LINES)
@@ -434,6 +435,19 @@ void clm_glVertex2i(int x, int y)
 }
 
 /**********************************************************
+glVertex specifies a point for drawing, though how it is 
+drawn depends on the mode specified by glBegin. 
+glVertex2i(x,y) specifies the 4-vector point (x,y,0,1).
+//, plus possibly other glVertex calls
+**********************************************************/
+void clm_glVertex2i(int x, int y)
+{
+   glVertex2i(x,y);
+   vertex2i(x,y);
+   return;
+}
+
+/**********************************************************
 There must be one glEnd for every glBegin. glVertex only 
 works between Begin & End pairs.
 **********************************************************/
@@ -562,7 +576,26 @@ void clm_glPopMatrix()
 void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
 {
    glVertex4f(x, y, z, w);
-   //TODO
+   vector4 v(x,y,z,w);
+   
+   //  Projection                ModelView
+   v = matrixStacks[1].back() * matrixStacks[0].back() * v;
+   
+   //Divid by W
+   v /= v[3];
+   
+   //Size to your viewport. Basically, add 1 to all x and y coordinates, 
+   //and then divide by two. This will put all your points between 0,0 and 
+   //1,1. Then, multiply your x coordinate by the viewport width and add the 
+   //x viewport min. Do the same to your y coordinate with the height and y 
+   //viewport min.
+   v[0] = ((v[0]+1)/2.0) * viewport[2] + viewport[0];
+   v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
+   
+   if (depth_test)
+      if (zBuffer
+      vertex2i(round(v[0]), round(v[1]));
+      
    return;
 }
 
@@ -966,6 +999,16 @@ void initRaster()
 }
 
 /**********************************************************
+* Initialize the Z Buffer to 1's.
+**********************************************************/
+void initZBuffer()
+{
+   for (int i = 0; i < Z_BUFFER_SIZE; i++)
+      zBuffer[i] = 1;
+   return;
+}
+
+/**********************************************************
 * Initalizes clm_'s matrix stacks.
 **********************************************************/
 void initMatrixStacks()
@@ -983,6 +1026,7 @@ void initMatrixStacks()
 void init ()
 {
    initRaster();
+   initZBuffer();
    initMatrixStacks();
    glShadeModel(GL_SMOOTH);			// Enable Smooth Shading
    glClearDepth(1.0f);					// Depth Buffer Setup

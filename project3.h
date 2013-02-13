@@ -18,6 +18,7 @@ typedef cml::vector4d vector4;
 //---------------------Forward Declarations----------------
 void setPixel(int x, int y, double r, double g, double b);
 vector4 getPixelColor(int x, int y);
+void initZBuffer();
 
 /**********************************************************
 * // GLOBAL CRAP
@@ -25,10 +26,12 @@ vector4 getPixelColor(int x, int y);
 const int SCREEN_HEIGHT = 480;
 const int SCREEN_WIDTH  = 640;
 const int RASTER_SIZE   = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
+const int Z_BUFFER_SIZE = SCREEN_HEIGHT * SCREEN_WIDTH;
 
 vector4 clearColor(0,0,0,0);
 vector4 penColor(0,0,0,0);
 float raster[RASTER_SIZE];
+double zBuffer[Z_BUFFER_SIZE];
 GLenum glDrawMode;
 vector<Point> savedPoints;
 Point firstPt(-1,-1);
@@ -44,7 +47,7 @@ bool depth_test = false;
 vector<matrix4> matrixStacks[2];
 vector<matrix4> * currentMatrixStack;
 
-vector4 viewport(0,0,0,0);
+vector4 viewport(0,0,0,0);//xmin, ymin, width, height
 matrix4 identityMatrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 //-------------------PRINT CRAP--------------------------------------
