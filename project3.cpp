@@ -654,18 +654,6 @@ void clm_glDisable(GLenum mask)
 }
 
 /**********************************************************
-* This function will return if a four vector is a unit
-* vector.
-**********************************************************/
-inline bool isUnitVector(const vector4& v)
-{
-   return 1 == sqrt(v[0]*v[0] +
-                    v[1]*v[1] +
-                    v[2]*v[2] +
-                    v[3]*v[3]);
-}
-
-/**********************************************************
 *  multiply the current matrix by a rotation matrix
 **********************************************************/
 void clm_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
@@ -674,8 +662,6 @@ void clm_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
    
    double s = sin(angle);
    double c = cos(angle);
-   
-   //TODO Normalize x,y,z if not normalized
    
    matrix4 m(pow(x,2)*(1-c)+c,  x*y*(1-c)-z*s,     x*z*(1-c)+y*s,     0,
              y*x*(1-c)+z*s,     pow(y,2)*(1-c)+c,  y*z*(1-c)-x*s,     0,
@@ -725,12 +711,19 @@ void clm_glOrtho(GLdouble left, GLdouble right, GLdouble bottom,
                  GLdouble top,  GLdouble zNear, GLdouble zFar)
 {
    glOrtho(left, right, bottom, top, zNear, zFar);
+   
+   double tx = - (right + left)   / (right - left);
+   double ty = - (top   + bottom) / (top   - bottom);
+   double tz = - (zFar  + zNear)  / (zFar  - zNear);
+
+   matrix4 m( 2/(right-left), 0, 0, tx,
+              0, 2/(top-bottom), 0, ty,
+              0, 0, -2/(zFar-zNear),tz,
+              0, 0, 0, 1);
+   
+   multMatrix(m);
    return;
 }
-
-
-
-
 
 
 #include "matrixTestCase.h"
