@@ -200,7 +200,7 @@ void clm_glBegin(GLenum eVar)
 {
    glBegin(eVar);
    glDrawMode = eVar;
-   firstPt.set(-1,-1);
+   firstPt.clear();
    return;
 }
 
@@ -208,11 +208,11 @@ void clm_glBegin(GLenum eVar)
 This function will save the given point and return if 
 the desired number of points has been reached.
 **********************************************************/
-bool saveAndReachedPoints(int num, int x, int y)
+bool saveAndReachedPoints(int num, int x, int y, double z, double w)
 {
    if (savedPoints.size() < num)
    {  //save
-      savedPoints.push_back(Point(x,y));
+      savedPoints.push_back(Point(x,y,z,w,penColor));
       return savedPoints.size() == num;
    }
    else 
@@ -226,17 +226,13 @@ bool saveAndReachedPoints(int num, int x, int y)
 /**********************************************************
 Draws a strip between two points.
 **********************************************************/
-void drawStrip(int x, int y)
+void drawStrip(int x, int y, double z, double w)
 {
    if (savedPoints.size() == 0)
-   {
-      setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-      saveAndReachedPoints(2, x, y);
-   }
+      saveAndReachedPoints(2, x, y, z, w);
    else
    {
-      setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-      saveAndReachedPoints(2,x,y);
+      saveAndReachedPoints(2,x,y,z,w);
       drawLine(savedPoints[0].x, savedPoints[0].y,
                savedPoints[1].x, savedPoints[1].y);
                
@@ -248,30 +244,25 @@ void drawStrip(int x, int y)
 /**********************************************************
 * Set's raster pixels given current drawing mode.
 **********************************************************/
-void vertex2i(int x, int y)
+void drawVertex(int x, int y, double z, double w)
 {
    if (glDrawMode == GL_POINTS) 
       setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    else if (glDrawMode == GL_LINES)
    {
       int numPointsInLine = 2;
-      if (saveAndReachedPoints(numPointsInLine, x, y))
+      if (saveAndReachedPoints(numPointsInLine, x, y, z, w))
       {
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
          drawLine(savedPoints[0].x, savedPoints[0].y,
                   savedPoints[1].x, savedPoints[1].y);
          savedPoints.clear();
       }
-      else if (savedPoints.size() == 1)
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
 	}
 	else if (glDrawMode == GL_TRIANGLES)
 	{
 	   int numPointsInTri = 3;
-      if (saveAndReachedPoints(numPointsInTri, x, y))
+      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
       {
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         
          vector<Point> points;
          vector<Point> temp;
          
@@ -288,32 +279,26 @@ void vertex2i(int x, int y)
          
          savedPoints.clear();
       }
-      else if (savedPoints.size() == 1 ||
-               savedPoints.size() == 2)
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         	    
 	}
    //Draws one line segment for every call to glVertex2i except the first; 
    //vertices n and n + 1 define line segment n.
    else if (glDrawMode == GL_LINE_STRIP)
    {
-      drawStrip(x,y);
+      drawStrip(x,y,z,w);
    }
    //Exactly like GL_LINE_STRIP except one additional line is draw between 
    //the first and last calls to glVertex2i when glEnd is called.
    else if (glDrawMode == GL_LINE_LOOP)
    {
-      if (firstPt.eq(Point(-1,-1)))
-         firstPt.set(x,y);
-      drawStrip(x,y);
+      if (firstPt.eq(Point(-1,-1,-1,-1)))
+         firstPt.set(x,y,z,w,penColor);
+      drawStrip(x,y,z,w);
    }
    else if (glDrawMode == GL_TRIANGLE_STRIP)//Draws a connected group of triangles.
    {
       int numPointsInTri = 3;
-      if (saveAndReachedPoints(numPointsInTri, x, y))
+      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
       {
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         
          vector<Point> points;
          vector<Point> temp;
          
@@ -330,18 +315,13 @@ void vertex2i(int x, int y)
          
          savedPoints.erase(savedPoints.begin());
       }
-      else if (savedPoints.size() == 1 ||
-               savedPoints.size() == 2)
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
    else if (glDrawMode == GL_TRIANGLE_FAN || 
             glDrawMode == GL_POLYGON)//Draws a connected group of triangles. 
    {
       int numPointsInTri = 3;
-      if (saveAndReachedPoints(numPointsInTri, x, y))
+      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
       {
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         
          vector<Point> points;
          vector<Point> temp;
          
@@ -358,17 +338,12 @@ void vertex2i(int x, int y)
          
          savedPoints.erase(savedPoints.begin()+1);
       }
-      else if (savedPoints.size() == 1 ||
-               savedPoints.size() == 2)
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
    else if (glDrawMode == GL_QUADS)
    {
       int numPointsInTri = 4;
-      if (saveAndReachedPoints(numPointsInTri, x, y))
+      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
       {
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         
          vector<Point> points;
          vector<Point> temp;
          
@@ -388,18 +363,12 @@ void vertex2i(int x, int y)
          
          savedPoints.clear();
       }
-      else if (savedPoints.size() == 1 ||
-               savedPoints.size() == 2 || 
-               savedPoints.size() == 3)
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
    else if (glDrawMode == GL_QUAD_STRIP)
    {
       int numPointsInTri = 4;
-      if (saveAndReachedPoints(numPointsInTri, x, y))
+      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
       {
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
-         
          vector<Point> points;
          vector<Point> temp;
          
@@ -420,30 +389,12 @@ void vertex2i(int x, int y)
          savedPoints.erase(savedPoints.begin());
          savedPoints.erase(savedPoints.begin());
       }
-      else if (savedPoints.size() == 1 ||
-               savedPoints.size() == 2 || 
-               savedPoints.size() == 3)
-         setPixel(x, y, penColor[0], penColor[1], penColor[2]);
    }
    else
 	{
 	   cout << "Holly Crap!" << endl;
 	   exit(0);
 	}
-   
-   return;
-}
-
-/**********************************************************
-glVertex specifies a point for drawing, though how it is 
-drawn depends on the mode specified by glBegin. 
-glVertex2i(x,y) specifies the 4-vector point (x,y,0,1).
-//, plus possibly other glVertex calls
-**********************************************************/
-void clm_glVertex2i(int x, int y)
-{
-   glVertex2i(x,y);
-   vertex2i(x,y);
    return;
 }
 
@@ -456,10 +407,10 @@ void clm_glEnd()
    glEnd();
    
    if (glDrawMode == GL_LINE_LOOP)
-      drawStrip(firstPt.x, firstPt.y);
+      drawStrip(firstPt.x, firstPt.y, firstPt.z, firstPt.w);
    
    savedPoints.clear();
-   firstPt.set(-1,-1);
+   firstPt.clear();
    return;
 }
 
@@ -592,7 +543,7 @@ void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
    v[0] = ((v[0]+1)/2.0) * viewport[2] + viewport[0];
    v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
             
-   vertex2i(round(v[0]), round(v[1]));
+   drawVertex(round(v[0]), round(v[1]), v[2], v[3]);
    
    return;
 }
@@ -610,6 +561,19 @@ void clm_glVertex2f(double x, double y)
 {
    glVertex2f(x, y);
    clm_glVertex4f(x, y);
+}
+
+/**********************************************************
+glVertex specifies a point for drawing, though how it is 
+drawn depends on the mode specified by glBegin. 
+glVertex2i(x,y) specifies the 4-vector point (x,y,0,1).
+//, plus possibly other glVertex calls
+**********************************************************/
+void clm_glVertex2i(int x, int y)
+{
+   glVertex2i(x,y);
+   clm_glVertex4f(x,y);
+   return;
 }
 
 /**********************************************************

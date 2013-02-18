@@ -1,3 +1,6 @@
+#ifndef clm_project3
+#define clm_project3
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <algorithm>
@@ -34,7 +37,7 @@ float raster[RASTER_SIZE];
 double zBuffer[Z_BUFFER_SIZE];
 GLenum glDrawMode;
 vector<Point> savedPoints;
-Point firstPt(-1,-1);
+Point firstPt(-1,-1, -1, -1, vector4(-1,-1,-1,-1));
 int lineWidth = 1;
 
 int drawMode    = 0;
@@ -54,3 +57,4 @@ matrix4 identityMatrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 void pp(vector4 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}
 void pp(Point p) {cout << p.x << "," << p.y << endl;}
 
+#endif

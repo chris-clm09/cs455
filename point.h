@@ -1,13 +1,32 @@
 #ifndef clm_point
 #define clm_point
+typedef cml::vector4d vector4;
 
 class Point
 {
 public:
+   void init(int x, int y, double z, double w, vector4 color)
+   {
+      this->x = x;
+		this->y = y;
+		this->z = z;
+		this->w = w;
+		this->color = color;
+   }
+
+	Point(int x, int y, double z, double w, vector4 color)
+	{
+	   init(x,y,z,w,color);	
+	}
+	
 	Point(int x, int y)
 	{
-		this->x = x;
-		this->y = y;
+	   init(x,y,0,1,vector4(0,0,0,0));
+	}
+	
+	Point(int x, int y, double z, double w)
+	{
+	   init(x,y,z,w,vector4(0,0,0,0));
 	}
 	
 	bool operator<(const Point& rhs)
@@ -16,13 +35,20 @@ public:
 	}
 	
 	bool eq(const Point& p)
-	{ return x == p.x && y == p.y; }
+	{ return x == p.x && y == p.y &&
+	         z == p.z && w == p.w; }
 	
-	void set(int x, int y)
-	{this-> x = x; this->y = y;}
+	void set(int x, int y, double z, double w, vector4 color)
+	{init(x,y,z,w,color);}
 	
-	int x;
-	int y;
+	void clear()
+	{init(-1,-1,-1,-1,vector4(0,0,0,0));}
+	
+	int    x;
+	int    y;
+	double z;
+	double w;
+	vector4 color;
 };
 
 struct less_key
