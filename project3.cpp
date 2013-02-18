@@ -138,9 +138,9 @@ This function will set the color of a pixel.
 void setPixel(int x, int y, double r, double g, double b)
 { 
    //Check if point is in screen and viewport   
-   if (x > SCREEN_WIDTH || y > SCREEN_HEIGHT || x < 0 || y < 0
-     ||x > viewport[0] + viewport[2] || x < viewport[0]
-     ||y > viewport[1] + viewport[3] || y < viewport[1])
+   if (x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT || x < 0 || y < 0
+     ||x >= viewport[0] + viewport[2] || x < viewport[0]
+     ||y >= viewport[1] + viewport[3] || y < viewport[1])
      return;
      
    int temp = ((y * SCREEN_WIDTH) + x) * 3;
