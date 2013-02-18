@@ -26,6 +26,14 @@ float getFraction(int sx, int sy,
 
 
 /**********************************************************
+* This function will return the interpolated the z value.
+**********************************************************/
+double interpolateZ(Point one, Point two)
+{
+   return 1;
+}
+
+/**********************************************************
 * This function will return the interpolated color
 * based on a certin fraction.
 * Source:

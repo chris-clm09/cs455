@@ -16,6 +16,8 @@ Point setLinePixel(Point one, Point two, float cX, float cY)
                                        getFraction(one.x, one.y, 
                                                    two.x, two.y, 
                                                    cX,    cY));
+   double cZ = interpolateZ(one, two);
+   
    setPixel(cX, cY, theColor[0], theColor[1], theColor[2]);      
    
    //TODO Fix Z and W
