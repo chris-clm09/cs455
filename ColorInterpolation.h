@@ -28,9 +28,15 @@ float getFraction(int sx, int sy,
 /**********************************************************
 * This function will return the interpolated the z value.
 **********************************************************/
-double interpolateZ(Point one, Point two)
+double interpolateZ(Point one, Point two, float fraction)
 {
-   return 1;
+   fraction = min(fraction, 1.0f);
+   fraction = max(fraction, 0.0f);
+   
+   
+   
+   
+   return two.z;
 }
 
 /**********************************************************

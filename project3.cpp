@@ -11,17 +11,22 @@ This function will set a pixel in a line.
 **********************************************************/
 Point setLinePixel(Point one, Point two, float cX, float cY)
 {
+   float fraction = getFraction(one.x, one.y, 
+                                two.x, two.y, 
+                                cX,    cY);
+                                       
    vector4 theColor = interpolateColor(one.color,
                                        two.color,
-                                       getFraction(one.x, one.y, 
-                                                   two.x, two.y, 
-                                                   cX,    cY));
-   double cZ = interpolateZ(one, two);
+                                       fraction);
+
+   double cZ = interpolateZ(one, two, fraction);
    
-   setPixel(cX, cY, theColor[0], theColor[1], theColor[2]);      
+
+   Point pixel(cX, cY, cZ, 0, theColor);
    
-   //TODO Fix Z and W
-   return Point(cX,cY, -1, -1, theColor);
+   setPixel(pixel);      
+   
+   return pixel;
 }                  
 
 
@@ -141,18 +146,24 @@ void clm_glClearColor(float r, float g, float b, float a)
 /**********************************************************
 This function will set the color of a pixel.
 **********************************************************/
-void setPixel(int x, int y, double r, double g, double b)
+void setPixel(const Point& pixel)
 { 
    //Check if point is in screen and viewport   
-   if (x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT || x < 0 || y < 0
-     ||x >= viewport[0] + viewport[2] || x < viewport[0]
-     ||y >= viewport[1] + viewport[3] || y < viewport[1])
+   if (pixel.x >= SCREEN_WIDTH || pixel.y >= SCREEN_HEIGHT 
+     || pixel.x < 0 || pixel.y < 0
+     || pixel.x >= viewport[0] + viewport[2] || pixel.x < viewport[0]
+     || pixel.y >= viewport[1] + viewport[3] || pixel.y < viewport[1]
+     || (depth_test && pixel.z >= zBuffer[pixel.x][pixel.y]))
      return;
      
-   int temp = ((y * SCREEN_WIDTH) + x) * 3;
-   raster[ temp + 0 ] = r;
-   raster[ temp + 1 ] = g;
-   raster[ temp + 2 ] = b;   
+   int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
+   raster[ temp + 0 ] = pixel.color[0];
+   raster[ temp + 1 ] = pixel.color[1];
+   raster[ temp + 2 ] = pixel.color[2];
+   
+   if (depth_test)
+      zBuffer[pixel.x][pixel.y]  = pixel.z;
+        
    return;
 }
 
@@ -174,10 +185,14 @@ Fill raster via color.
 void fillRasterWColor(vector4 color, int x_start = 0, int x_max = SCREEN_WIDTH 
                                    , int y_start = 0, int y_max = SCREEN_HEIGHT)
 {
+   bool oldText = depth_test;
+   depth_test = false;
+   
    for (int x = x_start; x < x_max; x++)
       for (int y = y_start; y < y_max; y++)
-         setPixel(x, y, color[0], color[1], color[2]);
+         setPixel(Point(x, y, 0, 1, color));
          
+   depth_test = oldText;      
    return;
 }
 
@@ -187,13 +202,13 @@ Clears the entire screen to the clear color.
 void clm_glClear(GLint bit)
 {
    glClear(bit);
-  
+   
    if (bit & GL_DEPTH_BUFFER_BIT)
       initZBuffer();
-   
+  
    fillRasterWColor(clearColor, viewport[0], viewport[2],
                                 viewport[1], viewport[3]);
-                
+               
    return;
 }
 
@@ -252,7 +267,7 @@ void drawStrip(int x, int y, double z, double w)
 void drawVertex(int x, int y, double z, double w)
 {
    if (glDrawMode == GL_POINTS) 
-      setPixel(x, y, penColor[0], penColor[1], penColor[2]);
+      setPixel(Point(x, y, z, w, penColor));
    else if (glDrawMode == GL_LINES)
    {
       int numPointsInLine = 2;
@@ -952,8 +967,10 @@ void initRaster()
 **********************************************************/
 void initZBuffer()
 {
-   for (int i = 0; i < Z_BUFFER_SIZE; i++)
-      zBuffer[i] = 1;
+   for (int x = 0; x < SCREEN_WIDTH; x++)
+      for (int y = 0; y < SCREEN_HEIGHT; y++)
+         zBuffer[x][y] = 1;
+         
    return;
 }
 

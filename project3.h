@@ -19,7 +19,7 @@ typedef cml::vector4d vector4;
 #include "ColorInterpolation.h"
 
 //---------------------Forward Declarations----------------
-void setPixel(int x, int y, double r, double g, double b);
+void setPixel(const Point& pixel);
 vector4 getPixelColor(int x, int y);
 void initZBuffer();
 
@@ -34,7 +34,7 @@ const int Z_BUFFER_SIZE = SCREEN_HEIGHT * SCREEN_WIDTH;
 vector4 clearColor(0,0,0,0);
 vector4 penColor(0,0,0,0);
 float raster[RASTER_SIZE];
-double zBuffer[Z_BUFFER_SIZE];
+double zBuffer[SCREEN_WIDTH][SCREEN_HEIGHT];
 GLenum glDrawMode;
 vector<Point> savedPoints;
 Point firstPt(-1,-1, -1, -1, vector4(-1,-1,-1,-1));
