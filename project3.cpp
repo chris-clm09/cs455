@@ -9,12 +9,13 @@ int round(T n) {return (int) (n + .5);}
 /**********************************************************
 This function will set a pixel in a line.
 **********************************************************/
-void setLinePixel(int xOne, int yOne, int xTwo, int yTwo,
-                  float cX, float cY)
+void setLinePixel(Point one, Point two, float cX, float cY)
 {
-   vector4 theColor = interpolateColor( getPixelColor(xOne,yOne),
-                                        getPixelColor(xTwo,yTwo),
-                    getFraction(xOne, yOne, xTwo, yTwo, cX, cY));
+   vector4 theColor = interpolateColor(one.color,
+                                       two.color,
+                                       getFraction(one.x, one.y, 
+                                                   two.x, two.y, 
+                                                   cX,    cY));
    setPixel(cX, cY, theColor[0], theColor[1], theColor[2]);      
    return;
 }                  
@@ -24,80 +25,82 @@ void setLinePixel(int xOne, int yOne, int xTwo, int yTwo,
 * /// Line Function ///
 * This function will draw a line between the two points.
 **********************************************************/
-vector<Point> drawLine(int xOne, int yOne, int xTwo, int yTwo)
+vector<Point> drawLine(Point one, Point two)
 {
-   int pts[] = { xOne, yOne, xTwo, yTwo };
-	int dX = xTwo - xOne;
-	int dY = yTwo - yOne;
+   Point savedOne = one;
+   Point savedTwo = two;
+   
+	int dX = two.x - one.x;
+	int dY = two.y - one.y;
 	float slope     = (float)dY / (float)dX;
-	float intersept = yTwo - slope * xTwo;
+	float intersept = two.y - slope * two.x;
 	vector<Point> theLine;
 	
 	if (dX == 0)
 	{
-		int change = (yOne > yTwo ? -1 : 1);
-		while (yOne != yTwo)
+		int change = (one.y > two.y ? -1 : 1);
+		while (one.y != two.y)
 		{
-			yOne += change;
-			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne);
+			one.y += change;
+			setLinePixel(savedOne, savedTwo, one.x, one.y);
 			for (int i = 0; i <= lineWidth/2; i++)
 			{
-			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne+i, yOne);
-			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne-i, yOne);
+			   setLinePixel(savedOne, savedTwo, one.x+i, one.y);
+			   setLinePixel(savedOne, savedTwo, one.x-i, one.y);
 			}      
-			theLine.push_back(Point(xOne,yOne));
+			theLine.push_back(Point(one.x,one.y));
 		}
 		return theLine;	
 	}
 	else if (dY == 0)
 	{
-		int change = (xOne > xTwo ? -1 : 1);
-		while (xOne != xTwo)
+		int change = (one.x > two.x ? -1 : 1);
+		while (one.x != two.x)
 		{
-			xOne += change;
-			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne);
+			one.x += change;
+			setLinePixel(savedOne, savedTwo, one.x, one.y);
 			for (int i = 0; i <= lineWidth/2; i++)
 			{
-			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne+i);
-			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, yOne-i);
+			   setLinePixel(savedOne, savedTwo, one.x, one.y+i);
+			   setLinePixel(savedOne, savedTwo, one.x, one.y-i);
 			}
-			theLine.push_back(Point(xOne,yOne));
+			theLine.push_back(Point(one.x,one.y));
 		}
 		return theLine;	
 	}
 	
 	if (abs(dX) > abs(dY))
 	{
-		int change = (xOne > xTwo ? -1 : 1);
+		int change = (one.x > two.x ? -1 : 1);
 		unsigned int newY; 
-		while (xOne != xTwo)
+		while (one.x != two.x)
 		{
-			xOne += change;
-			newY = (unsigned int) (ceil(slope * xOne + intersept-.5));
-			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne, newY);
+			one.x += change;
+			newY = (unsigned int) (ceil(slope * one.x + intersept-.5));
+			setLinePixel(savedOne, savedTwo, one.x, newY);
 			for (int i = 0; i <= lineWidth/2; i++)
 			{
-			   setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne+i, newY);
-   			setLinePixel(pts[0], pts[1], pts[2], pts[3], xOne-i, newY);
+			   setLinePixel(savedOne, savedTwo, one.x+i, newY);
+   			setLinePixel(savedOne, savedTwo, one.x-i, newY);
    	   }
-			theLine.push_back(Point(xOne, newY));
+			theLine.push_back(Point(one.x, newY));
 		}	
 	}
 	else
 	{
-		int change = (yOne > yTwo ? -1 : 1);
+		int change = (one.y > two.y ? -1 : 1);
 		unsigned int newX;
-		while (yOne != yTwo)
+		while (one.y != two.y)
 		{
-			yOne += change;
-			newX = (unsigned int)(ceil((1.0 / slope) * (yOne - intersept) -.5));
-			setLinePixel(pts[0], pts[1], pts[2], pts[3], newX, yOne);
+			one.y += change;
+			newX = (unsigned int)(ceil((1.0 / slope) * (one.y - intersept) -.5));
+			setLinePixel(savedOne, savedTwo, newX, one.y);
 			for (int i = 0; i <= lineWidth/2; i++)
 			{
-			   setLinePixel(pts[0], pts[1], pts[2], pts[3], newX+i, yOne);
-   			setLinePixel(pts[0], pts[1], pts[2], pts[3], newX-i, yOne);
+			   setLinePixel(savedOne, savedTwo, newX+i, one.y);
+   			setLinePixel(savedOne, savedTwo, newX-i, one.y);
    	   }
-			theLine.push_back(Point(newX,yOne));
+			theLine.push_back(Point(newX,one.y));
 		}
 	}
 	return theLine;
