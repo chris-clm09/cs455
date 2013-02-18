@@ -6,29 +6,29 @@ using namespace std;
 /***************************************************************
 This function will find a vetor's back y's min x.
 ***************************************************************/
-int getXMin(vector<Point> pts)
+Point getXMin(vector<Point> pts)
 {
-   int min = pts.back().x;
+   Point minPoint = pts.back();
    
    for (int i = pts.size() - 1; i >= 0 && pts[i].y == pts.back().y; i--)
-      if (pts[i].x < min)
-         min = pts[i].x;
+      if (pts[i].x < minPoint.x)
+         minPoint = pts[i];
 
-   return min;
+   return minPoint;
 }
 
 /***************************************************************
 This function will find a vetor's back y's max x.
 ***************************************************************/
-int getXMax(vector<Point> pts)
+Point getXMax(vector<Point> pts)
 {
-   int max = pts.back().x;
+   Point maxPoint = pts.back();
    
    for (int i = pts.size() - 1; i >= 0 && pts[i].y == pts.back().y; i--)
-      if (pts[i].x > max)
-         max = pts[i].x;
+      if (pts[i].x > maxPoint.x)
+         maxPoint = pts[i];
    
-   return max;
+   return maxPoint;
 }
 
 /***************************************************************

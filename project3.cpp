@@ -9,7 +9,7 @@ int round(T n) {return (int) (n + .5);}
 /**********************************************************
 This function will set a pixel in a line.
 **********************************************************/
-void setLinePixel(Point one, Point two, float cX, float cY)
+Point setLinePixel(Point one, Point two, float cX, float cY)
 {
    vector4 theColor = interpolateColor(one.color,
                                        two.color,
@@ -17,7 +17,9 @@ void setLinePixel(Point one, Point two, float cX, float cY)
                                                    two.x, two.y, 
                                                    cX,    cY));
    setPixel(cX, cY, theColor[0], theColor[1], theColor[2]);      
-   return;
+   
+   //TODO Fix Z and W
+   return Point(cX,cY, -1, -1, theColor);
 }                  
 
 
@@ -27,14 +29,17 @@ void setLinePixel(Point one, Point two, float cX, float cY)
 **********************************************************/
 vector<Point> drawLine(Point one, Point two)
 {
-   Point savedOne = one;
-   Point savedTwo = two;
+   Point savedOne(one);
+   Point savedTwo(two);
    
 	int dX = two.x - one.x;
 	int dY = two.y - one.y;
 	float slope     = (float)dY / (float)dX;
 	float intersept = two.y - slope * two.x;
 	vector<Point> theLine;
+	theLine.push_back(one);
+	theLine.push_back(two);
+	
 	
 	if (dX == 0)
 	{
@@ -42,13 +47,12 @@ vector<Point> drawLine(Point one, Point two)
 		while (one.y != two.y)
 		{
 			one.y += change;
-			setLinePixel(savedOne, savedTwo, one.x, one.y);
+			theLine.push_back(setLinePixel(savedOne, savedTwo, one.x, one.y));
 			for (int i = 0; i <= lineWidth/2; i++)
 			{
 			   setLinePixel(savedOne, savedTwo, one.x+i, one.y);
 			   setLinePixel(savedOne, savedTwo, one.x-i, one.y);
 			}      
-			theLine.push_back(Point(one.x,one.y));
 		}
 		return theLine;	
 	}
@@ -58,13 +62,12 @@ vector<Point> drawLine(Point one, Point two)
 		while (one.x != two.x)
 		{
 			one.x += change;
-			setLinePixel(savedOne, savedTwo, one.x, one.y);
+			theLine.push_back(setLinePixel(savedOne, savedTwo, one.x, one.y));
 			for (int i = 0; i <= lineWidth/2; i++)
 			{
 			   setLinePixel(savedOne, savedTwo, one.x, one.y+i);
 			   setLinePixel(savedOne, savedTwo, one.x, one.y-i);
 			}
-			theLine.push_back(Point(one.x,one.y));
 		}
 		return theLine;	
 	}
@@ -77,13 +80,12 @@ vector<Point> drawLine(Point one, Point two)
 		{
 			one.x += change;
 			newY = (unsigned int) (ceil(slope * one.x + intersept-.5));
-			setLinePixel(savedOne, savedTwo, one.x, newY);
+			theLine.push_back(setLinePixel(savedOne, savedTwo, one.x, newY));
 			for (int i = 0; i <= lineWidth/2; i++)
 			{
 			   setLinePixel(savedOne, savedTwo, one.x+i, newY);
    			setLinePixel(savedOne, savedTwo, one.x-i, newY);
    	   }
-			theLine.push_back(Point(one.x, newY));
 		}	
 	}
 	else
@@ -94,13 +96,12 @@ vector<Point> drawLine(Point one, Point two)
 		{
 			one.y += change;
 			newX = (unsigned int)(ceil((1.0 / slope) * (one.y - intersept) -.5));
-			setLinePixel(savedOne, savedTwo, newX, one.y);
+			theLine.push_back(setLinePixel(savedOne, savedTwo, newX, one.y));
 			for (int i = 0; i <= lineWidth/2; i++)
 			{
 			   setLinePixel(savedOne, savedTwo, newX+i, one.y);
    			setLinePixel(savedOne, savedTwo, newX-i, one.y);
    	   }
-			theLine.push_back(Point(newX,one.y));
 		}
 	}
 	return theLine;
@@ -117,9 +118,9 @@ void fill(vector<Point> points)
    
    while (points.size() > 0)
    {
-      int min = getXMin(points);
-      int max = getXMax(points);
-      drawLine(min, points.back().y, max, points.back().y);
+      Point min = getXMin(points);
+      Point max = getXMax(points);
+      drawLine(min,max);
       removeYBack(points);   
    }
    return;
@@ -236,8 +237,7 @@ void drawStrip(int x, int y, double z, double w)
    else
    {
       saveAndReachedPoints(2,x,y,z,w);
-      drawLine(savedPoints[0].x, savedPoints[0].y,
-               savedPoints[1].x, savedPoints[1].y);
+      drawLine(savedPoints[0], savedPoints[1]);
                
       savedPoints.erase(savedPoints.begin());
    }     
@@ -256,8 +256,7 @@ void drawVertex(int x, int y, double z, double w)
       int numPointsInLine = 2;
       if (saveAndReachedPoints(numPointsInLine, x, y, z, w))
       {
-         drawLine(savedPoints[0].x, savedPoints[0].y,
-                  savedPoints[1].x, savedPoints[1].y);
+         drawLine(savedPoints[0], savedPoints[1]);
          savedPoints.clear();
       }
 	}
@@ -269,13 +268,10 @@ void drawVertex(int x, int y, double z, double w)
          vector<Point> points;
          vector<Point> temp;
          
-         points = drawLine(savedPoints[0].x, savedPoints[0].y,
-                  savedPoints[1].x, savedPoints[1].y);
-         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
-                  savedPoints[2].x, savedPoints[2].y);
+         points = drawLine(savedPoints[0], savedPoints[1]);
+         temp   = drawLine(savedPoints[1], savedPoints[2]);
          points.insert(points.end(), temp.begin(), temp.end());
-         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
-                  savedPoints[0].x, savedPoints[0].y);
+         temp   = drawLine(savedPoints[2], savedPoints[0]);
          points.insert(points.end(), temp.begin(), temp.end());
                  
          fill(points);
@@ -305,13 +301,10 @@ void drawVertex(int x, int y, double z, double w)
          vector<Point> points;
          vector<Point> temp;
          
-         points = drawLine(savedPoints[0].x, savedPoints[0].y,
-                  savedPoints[1].x, savedPoints[1].y);
-         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
-                  savedPoints[2].x, savedPoints[2].y);
+         points = drawLine(savedPoints[0], savedPoints[1]);
+         temp   = drawLine(savedPoints[1], savedPoints[2]);
          points.insert(points.end(), temp.begin(), temp.end());
-         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
-                  savedPoints[0].x, savedPoints[0].y);
+         temp   = drawLine(savedPoints[2], savedPoints[0]);
          points.insert(points.end(), temp.begin(), temp.end());
                  
          fill(points);
@@ -328,13 +321,10 @@ void drawVertex(int x, int y, double z, double w)
          vector<Point> points;
          vector<Point> temp;
          
-         points = drawLine(savedPoints[0].x, savedPoints[0].y,
-                  savedPoints[1].x, savedPoints[1].y);
-         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
-                  savedPoints[2].x, savedPoints[2].y);
+         points = drawLine(savedPoints[0], savedPoints[1]);
+         temp   = drawLine(savedPoints[1], savedPoints[2]);
          points.insert(points.end(), temp.begin(), temp.end());
-         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
-                  savedPoints[0].x, savedPoints[0].y);
+         temp   = drawLine(savedPoints[2], savedPoints[0]);
          points.insert(points.end(), temp.begin(), temp.end());
                  
          fill(points);
@@ -350,16 +340,12 @@ void drawVertex(int x, int y, double z, double w)
          vector<Point> points;
          vector<Point> temp;
          
-         points = drawLine(savedPoints[0].x, savedPoints[0].y,
-                  savedPoints[1].x, savedPoints[1].y);
-         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
-                  savedPoints[2].x, savedPoints[2].y);
+         points = drawLine(savedPoints[0], savedPoints[1]);
+         temp   = drawLine(savedPoints[1], savedPoints[2]);
          points.insert(points.end(), temp.begin(), temp.end());
-         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
-                  savedPoints[3].x, savedPoints[3].y);
+         temp   = drawLine(savedPoints[2], savedPoints[3]);
          points.insert(points.end(), temp.begin(), temp.end());
-         temp   = drawLine(savedPoints[3].x, savedPoints[3].y,
-                  savedPoints[0].x, savedPoints[0].y);
+         temp   = drawLine(savedPoints[3], savedPoints[0]);
          points.insert(points.end(), temp.begin(), temp.end());
                  
          fill(points);
@@ -375,16 +361,12 @@ void drawVertex(int x, int y, double z, double w)
          vector<Point> points;
          vector<Point> temp;
          
-         points = drawLine(savedPoints[0].x, savedPoints[0].y,
-                  savedPoints[1].x, savedPoints[1].y);
-         temp   = drawLine(savedPoints[1].x, savedPoints[1].y,
-                  savedPoints[3].x, savedPoints[3].y);
+         points = drawLine(savedPoints[0], savedPoints[1]);
+         temp   = drawLine(savedPoints[1], savedPoints[3]);
          points.insert(points.end(), temp.begin(), temp.end());
-         temp   = drawLine(savedPoints[3].x, savedPoints[3].y,
-                  savedPoints[2].x, savedPoints[2].y);
+         temp   = drawLine(savedPoints[3], savedPoints[2]);
          points.insert(points.end(), temp.begin(), temp.end());
-         temp   = drawLine(savedPoints[2].x, savedPoints[2].y,
-                  savedPoints[0].x, savedPoints[0].y);
+         temp   = drawLine(savedPoints[2], savedPoints[0]);
          points.insert(points.end(), temp.begin(), temp.end());
                  
          fill(points);
