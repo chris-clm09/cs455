@@ -591,11 +591,9 @@ void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
    //viewport min.
    v[0] = ((v[0]+1)/2.0) * viewport[2] + viewport[0];
    v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
+            
+   vertex2i(round(v[0]), round(v[1]));
    
-   if (depth_test)
-      if (zBuffer
-      vertex2i(round(v[0]), round(v[1]));
-      
    return;
 }
 
@@ -1112,7 +1110,7 @@ void arrow_keys ( int a_keys, int x, int y )
 int main ( int argc, char** argv )   // Create Main Function
 {
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE); // Display Mode
+  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH); // Display Mode
   glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT); // This is the window size
   glutCreateWindow("CLM/OpenGL Graphics Program"); // Window Title
   init();
