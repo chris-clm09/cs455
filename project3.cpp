@@ -186,14 +186,14 @@ Fill raster via color.
 void fillRasterWColor(vector4 color, int x_start = 0, int x_max = SCREEN_WIDTH 
                                    , int y_start = 0, int y_max = SCREEN_HEIGHT)
 {
-   bool oldText = depth_test;
+   bool oldTest = depth_test;
    depth_test = false;
    
    for (int x = x_start; x < x_max; x++)
       for (int y = y_start; y < y_max; y++)
          setPixel(Point(x, y, 0, 1, color));
          
-   depth_test = oldText;      
+   depth_test = oldTest;      
    return;
 }
 
@@ -544,7 +544,7 @@ void clm4f(float x, float y, float z=0.0, float w=1.0)
    //viewport min.
    v[0] = ((v[0]+1)/2.0) * viewport[2] + viewport[0];
    v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
-            
+        
    drawVertex(round(v[0]), round(v[1]), v[2], v[3]);
    
    return;
@@ -680,7 +680,7 @@ void clm_glRotatef(double angle, double x, double y, double z)
              y*x*(1-c)+z*s,     y*y*(1-c)+c,       y*z*(1-c)-x*s,       0,
              x*z*(1-c)-y*s,     y*z*(1-c)+x*s,     z*z*(1-c)+c,         0,
                   0,                    0,                0,            1);
-   cout << m << endl;
+
    multMatrix(m);
    return;
 }
