@@ -527,9 +527,8 @@ void clm_glPopMatrix()
 /**********************************************************
 * Specifies a four vector point.
 **********************************************************/
-void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
+void clm4f(float x, float y, float z=0.0, float w=1.0)
 {
-   glVertex4f(x, y, z, w);
    vector4 v(x,y,z,w);
    
    //  Projection                ModelView
@@ -552,6 +551,16 @@ void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
 }
 
 /**********************************************************
+* Specifies a four vector point.
+**********************************************************/
+void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
+{
+   glVertex4f(x, y, z, w);
+   clm4f(x,y,z,w);   
+   return;
+}
+
+/**********************************************************
 * Calls flVertex4f with z=0.
 **********************************************************/
 void clm_glVertex3f(float x, float y, float z=0) 
@@ -563,7 +572,7 @@ void clm_glVertex3f(float x, float y, float z=0)
 void clm_glVertex2f(double x, double y)
 {
    glVertex2f(x, y);
-   clm_glVertex4f(x, y);
+   clm4f(x, y);
 }
 
 /**********************************************************
@@ -654,18 +663,24 @@ void clm_glDisable(GLenum mask)
 /**********************************************************
 *  multiply the current matrix by a rotation matrix
 **********************************************************/
-void clm_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+void clm_glRotatef(double angle, double x, double y, double z)
 {
    glRotatef(angle,x,y,z);
    
-   double s = sin(angle);
-   double c = cos(angle);
+   double s = sin(angle*M_PI/180.0);
+   double c = cos(angle*M_PI/180.0);
    
-   matrix4 m(pow(x,2)*(1-c)+c,  x*y*(1-c)-z*s,     x*z*(1-c)+y*s,     0,
-             y*x*(1-c)+z*s,     pow(y,2)*(1-c)+c,  y*z*(1-c)-x*s,     0,
-             x*z*(1-c)-y*s,     y*z*(1-c)+x*s,     pow(z,2)*(1-c)+c,  0,
-                  0,                    0,                0,          1);
+   //vector4 v = cml::normalize(vector4(x,y,z,1));
    
+   //x = v[0];
+   //y = v[1];
+   //z = v[2];
+   
+   matrix4 m((x*x*(1-c))+c,     (x*y*(1-c))-z*s,   (x*z*(1-c))+y*s,     0,
+             y*x*(1-c)+z*s,     y*y*(1-c)+c,       y*z*(1-c)-x*s,       0,
+             x*z*(1-c)-y*s,     y*z*(1-c)+x*s,     z*z*(1-c)+c,         0,
+                  0,                    0,                0,            1);
+   cout << m << endl;
    multMatrix(m);
    return;
 }
