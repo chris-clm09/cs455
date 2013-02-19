@@ -33,10 +33,7 @@ double interpolateZ(Point one, Point two, float fraction)
    fraction = min(fraction, 1.0f);
    fraction = max(fraction, 0.0f);
    
-   
-   
-   
-   return two.z;
+   return (two.z - one.z)*fraction + one.z;
 }
 
 /**********************************************************

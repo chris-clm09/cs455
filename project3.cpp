@@ -153,7 +153,8 @@ void setPixel(const Point& pixel)
      || pixel.x < 0 || pixel.y < 0
      || pixel.x >= viewport[0] + viewport[2] || pixel.x < viewport[0]
      || pixel.y >= viewport[1] + viewport[3] || pixel.y < viewport[1]
-     || (depth_test && pixel.z >= zBuffer[pixel.x][pixel.y]))
+     || (depth_test && pixel.z >= zBuffer[pixel.x][pixel.y]
+                       || pixel.z < -1 || pixel.z > 1))
      return;
      
    int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
