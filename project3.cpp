@@ -153,8 +153,8 @@ void setPixel(const Point& pixel)
      || pixel.x < 0 || pixel.y < 0
      || pixel.x >= viewport[0] + viewport[2] || pixel.x < viewport[0]
      || pixel.y >= viewport[1] + viewport[3] || pixel.y < viewport[1]
-     || (depth_test && pixel.z >= zBuffer[pixel.x][pixel.y]
-                       || pixel.z < -1 || pixel.z > 1))
+     || (depth_test && (pixel.z >= zBuffer[pixel.x][pixel.y]
+                       || pixel.z < -1 || pixel.z > 1)))
      return;
      
    int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
@@ -654,7 +654,7 @@ void clm_glDisable(GLenum mask)
 {
    glDisable(mask);
    
-   if (mask & GL_DEPTH_TEST)
+   if (mask & GL_DEPTH_TEST || mask == GL_DEPTH_TEST)
       depth_test = false;
    
    return;
@@ -669,12 +669,6 @@ void clm_glRotatef(double angle, double x, double y, double z)
    
    double s = sin(angle*M_PI/180.0);
    double c = cos(angle*M_PI/180.0);
-   
-   //vector4 v = cml::normalize(vector4(x,y,z,1));
-   
-   //x = v[0];
-   //y = v[1];
-   //z = v[2];
    
    matrix4 m((x*x*(1-c))+c,     (x*y*(1-c))-z*s,   (x*z*(1-c))+y*s,     0,
              y*x*(1-c)+z*s,     y*y*(1-c)+c,       y*z*(1-c)-x*s,       0,
@@ -737,6 +731,72 @@ void clm_glOrtho(GLdouble left, GLdouble right, GLdouble bottom,
    multMatrix(m);
    return;
 }
+
+/**********************************************************
+scale such that the point (cx,cy,cz) does not move.
+**********************************************************/
+void clm_fixedScale(double sx, double sy, double sz, 
+                    double cx, double cy, double cz)
+{
+   matrix4 M(sx, 0, 0, cx - cx * sx,
+             0, sy, 0, cy - cy * sy, 
+             0, 0, sz, cz,
+             0, 0, 0,  1);
+   
+   glMultMatrixd(M.data());
+   multMatrix(M);
+   return;
+}
+
+/**********************************************************
+shearing, where x moves sxy * y, etc.
+**********************************************************/
+void clm_shear(double sxy, double sxz, double syx, 
+               double syz, double szx, double szy)
+{
+   matrix4 M(1, sxy, sxz, 0,
+             syx, 1, syz, 0,
+             szx, szy, 1, 0,
+             0, 0, 0, 1);
+             
+   glMultMatrixd(M.data());
+   multMatrix(M);
+   return;
+}
+
+
+void clm_fullRotate(double angle, double x, double y, double z, 
+                                double bx, double by, double bz)
+{
+   double s = sin(angle*M_PI/180.0);
+   double c = cos(angle*M_PI/180.0);
+   
+   matrix4 m((x*x*(1-c))+c,     (x*y*(1-c))-z*s,   (x*z*(1-c))+y*s,     0,
+             y*x*(1-c)+z*s,     y*y*(1-c)+c,       y*z*(1-c)-x*s,       0,
+             x*z*(1-c)-y*s,     y*z*(1-c)+x*s,     z*z*(1-c)+c,         0,
+                  0,                    0,                0,            1);
+
+   matrix4 t(1,0,0,-bx,
+             0,1,0,-by,
+             0,0,1,-bz,
+             0,0,0,1);   
+   matrix4 tb(1,0,0, bx,
+              0,1,0, by,
+              0,0,1, bz,
+              0,0,0, 1);
+             
+   matrix4 M = tb*m*t;
+   
+   glMultMatrixd(M.data());
+   multMatrix(M);
+
+   return;
+}
+
+
+
+
+
 
 
 #include "matrixTestCase.h"
@@ -814,6 +874,7 @@ void draw()
          //Restore your viewport to the whole screen
          clm_glViewport(0,0,640,480);
          clm_glDisable(GL_DEPTH_TEST);
+         clm_glLoadIdentity();
          break;
       case 4:
       {
@@ -854,7 +915,8 @@ void draw()
          }
          break;
       case 5:
-         matrixTest();      
+         matrixTest(); 
+         clm_glDisable(GL_DEPTH_TEST);     
          break;
       case 6:
          //glRotate:
@@ -872,6 +934,7 @@ void draw()
            clm_glVertex3f(0.8,0.1,0);
            clm_glVertex3f(0.65,0.4,0);
          clm_glEnd();
+         clm_glLoadIdentity();
          break;
       case 7:
          //glTranslate:
@@ -889,6 +952,7 @@ void draw()
            clm_glVertex3f(0.8,0.1,0);
            clm_glVertex3f(0.65,0.4,0);
          clm_glEnd();
+         clm_glLoadIdentity();
          break;
       case 8:
          //glScale:
@@ -906,6 +970,7 @@ void draw()
            clm_glVertex3f(0.8,0.1,0);
            clm_glVertex3f(0.65,0.4,0);
          clm_glEnd();
+         clm_glLoadIdentity();
          break;
       case 9:
          //glOrtho:
@@ -925,9 +990,68 @@ void draw()
            clm_glColor3f(1,0,1);
            clm_glVertex3f(350,100,0);
          clm_glEnd();
+         clm_glLoadIdentity();
          break;   
       case 10:
+      //Fixed Scale:
+         clm_glDisable(GL_DEPTH_TEST); 
+         clm_glLoadIdentity();
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(.5,.9,1);
+           clm_glVertex3f(0.5,0.4,0);
+           clm_glVertex3f(0.8,0.4,0);
+           clm_glVertex3f(0.65,0.9,0);
+         clm_glEnd();
+         cout << depth_test << " TEST.\n";
+         clm_fixedScale(0.8,0.7,0,.5,.4,0);
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.8,0.7,0);
+           clm_glVertex3f(0.5,0.4,0);
+           clm_glVertex3f(0.8,0.4,0);
+           clm_glVertex3f(0.65,0.9,0);
+         clm_glEnd();
+         clm_glLoadIdentity();
          break;
+      case 11:
+      //clm_shear
+         clm_glDisable(GL_DEPTH_TEST);
+         clm_glLoadIdentity();
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(.5,.9,1);
+           clm_glVertex3f(0.1,0.0,0);
+           clm_glVertex3f(0.4,0.0,0);
+           clm_glVertex3f(0.25,0.5,0);
+         clm_glEnd();
+         
+         clm_shear(.5, 0, .5, 0, 0, 0);
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.8,0.7,0);
+           clm_glVertex3f(0.1,0.0,0);
+           clm_glVertex3f(0.4,0.0,0);
+           clm_glVertex3f(0.25,0.5,0);
+         clm_glEnd();
+         clm_glLoadIdentity();
+         break;
+      case 12:
+          //glRotate:
+         clm_glDisable(GL_DEPTH_TEST);
+         clm_glLoadIdentity();
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.5,0.2,1);
+           clm_glVertex3f(0.5,0.1,0);
+           clm_glVertex3f(0.8,0.1,0);
+           clm_glVertex3f(0.65,0.4,0);
+         clm_glEnd();
+         
+         clm_fullRotate(90,0,0,1,.5,.1,0);
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0.1,0.2,1);
+           clm_glVertex3f(0.5,0.1,0);
+           clm_glVertex3f(0.8,0.1,0);
+           clm_glVertex3f(0.65,0.4,0);
+         clm_glEnd();
+         clm_glLoadIdentity();
+      break;
       default:
          cout << "Unknown drawMode! I'm bailing!" << endl;
          exit(0);
@@ -1076,11 +1200,11 @@ void arrow_keys ( int a_keys, int x, int y )
 {
   switch ( a_keys ) {
     case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
-      drawMode = (drawMode+1)%11;
+      drawMode = (drawMode+1)%13;
       display();
       break;
     case GLUT_KEY_DOWN:               // When Down Arrow Is Pressed...
-      if ((drawMode=drawMode-1) < 0)drawMode=10;
+      if ((drawMode=drawMode-1) < 0)drawMode=12;
       display();
       break;
     default:
