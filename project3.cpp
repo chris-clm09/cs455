@@ -187,7 +187,7 @@ void fillRasterWColor(vector4 color, int x_start = 0, int x_max = SCREEN_WIDTH
                                    , int y_start = 0, int y_max = SCREEN_HEIGHT)
 {
    bool oldTest = depth_test;
-   depth_test = false;
+   depth_test   = false;
    
    for (int x = x_start; x < x_max; x++)
       for (int y = y_start; y < y_max; y++)
@@ -785,7 +785,7 @@ void clm_fullRotate(double angle, double x, double y, double z,
               0,0,1, bz,
               0,0,0, 1);
              
-   matrix4 M = tb*m*t;
+   matrix4 M = tb*m*t;//TODO Precalculate this.
    
    glMultMatrixd(M.data());
    multMatrix(M);
