@@ -793,7 +793,58 @@ void clm_fullRotate(double angle, double x, double y, double z,
    return;
 }
 
+/**********************************************************
+* glFrustum - multiply the current matrix by a perspective 
+*             matrix
+* 
+* glFrustum describes a perspective matrix that  produces  
+* a  perspective projection.   The  current  matrix  
+* (see glMatrixMode) is multiplied by this  matrix.
+**********************************************************/
+void clm_glFrustum(GLdouble left, GLdouble right, 
+                   GLdouble bottom, GLdouble top,
+                   GLdouble zNear, GLdouble zFar )
+{
+   glFrustum(left, right, bottom, top, zNear, zFar);
+   
+   
+   double A =       (right + left) / (right - left);
+   double B =       (top + bottom) / (top - bottom);
+   double C =     - (zFar + zNear) / (zFar - zNear);
+   double D = - (2 * zFar * zNear) / (zFar - zNear);
 
+   matrix4 m(2 * zNear/ (right - left), 0, A, 0,
+             0, 2*zNear/(top-bottom),      B, 0,
+             0, 0,  C, D,
+             0, 0, -1, 0);
+   return;
+}                       
+
+/**********************************************************
+* gluPerspective - set up a perspective projection matrix
+* 
+* gluPerspective specifies a viewing frustum into  the  
+* world  coordinate system.   In  general,  the aspect ratio 
+* in gluPerspective should match the aspect ratio of the 
+* associated viewport.
+* See man page.
+**********************************************************/
+void clm_gluPerspective(GLdouble fovy,  GLdouble aspect,
+                        GLdouble zNear, GLdouble zFar )
+{
+   gluPerspective(fovy, aspect, zNear, zFar);
+   
+   double angle = (fovy/2.0)*M_PI/180.0;
+   double f  = cos(angle)/sin(angle);
+
+   matrix4 m(f/aspect,      0,              0,              0,
+            0,              f,              0,              0,
+            0,              0, zFar+zNear/(zNear-zFar), 2*zFar*zNear/(zNear-zFar),
+            0,              0,              -1,             0);
+
+   
+   return;
+}
 
 
 /**********************************************************
@@ -808,10 +859,54 @@ void draw()
    switch (drawMode)
    {
       case 0:
+         //Fulstrum
+         clm_glMatrixMode(GL_PROJECTION);
+         clm_glLoadIdentity();
+         clm_glFrustum(-0.1,0.1, -0.1*480/640,0.1*480/640, 0.1,10);
+         clm_glMatrixMode(GL_MODELVIEW);
+         clm_glLoadIdentity();
 
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0,0,1);
+           clm_glVertex3f(-0.4,-0.6,-1);
+           clm_glVertex3f(0.4,-0.6,-1);
+           clm_glVertex3f(0.4,-0.1,-1);
+           clm_glVertex3f(0.4,-0.1,-1);
+           clm_glVertex3f(-0.4,-0.1,-1);
+           clm_glVertex3f(-0.4,-0.6,-1);
+           clm_glColor3f(1,0,1);
+           clm_glVertex3f(-0.4,-0.1,-1);
+           clm_glVertex3f(0.4,-0.1,-1);
+           clm_glVertex3f(0.3,0,-2);
+           clm_glVertex3f(0.3,0,-2);
+           clm_glVertex3f(-0.3,0,-2);
+           clm_glVertex3f(-0.4,-0.1,-1);
+         clm_glEnd();	
          break;
       case 1: 
+         //Perspective
+         clm_glMatrixMode(GL_PROJECTION);
+         clm_glLoadIdentity();
+         clm_gluPerspective(90, double(640)/480, .1, 10);
+         clm_glMatrixMode(GL_MODELVIEW);
+         clm_glLoadIdentity();
 
+         clm_glBegin(GL_TRIANGLES);
+           clm_glColor3f(0,0,1);
+           clm_glVertex3f(-0.4,-0.6,-1);
+           clm_glVertex3f(0.4,-0.6,-1);
+           clm_glVertex3f(0.4,-0.1,-1);
+           clm_glVertex3f(0.4,-0.1,-1);
+           clm_glVertex3f(-0.4,-0.1,-1);
+           clm_glVertex3f(-0.4,-0.6,-1);
+           clm_glColor3f(1,0,1);
+           clm_glVertex3f(-0.4,-0.1,-1);
+           clm_glVertex3f(0.4,-0.1,-1);
+           clm_glVertex3f(0.3,0,-2);
+           clm_glVertex3f(0.3,0,-2);
+           clm_glVertex3f(-0.3,0,-2);
+           clm_glVertex3f(-0.4,-0.1,-1);
+         clm_glEnd();
          break;
       case 2:
 
