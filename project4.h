@@ -1,5 +1,5 @@
-#ifndef clm_project3
-#define clm_project3
+#ifndef clm_project4
+#define clm_project4
 
 #define _USE_MATH_DEFINES
 #include <math.h>
