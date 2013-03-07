@@ -9,9 +9,9 @@ int round(T n) {return (int) (n + .5);}
 /**********************************************************
 This function will set a pixel in a line.
 **********************************************************/
-Point setLinePixel(Point one, Point two, float cX, float cY)
+Point setLinePixel(Point one, Point two, double cX, double cY)
 {
-   float fraction = getFraction(one.x, one.y, 
+   double fraction = getFraction(one.x, one.y, 
                                 two.x, two.y, 
                                 cX,    cY);
                                        
@@ -41,8 +41,8 @@ vector<Point> drawLine(Point one, Point two)
    
 	int dX = two.x - one.x;
 	int dY = two.y - one.y;
-	float slope     = (float)dY / (float)dX;
-	float intersept = two.y - slope * two.x;
+	double slope     = (double)dY / (double)dX;
+	double intersept = two.y - slope * two.x;
 	vector<Point> theLine;
 	theLine.push_back(one);
 	theLine.push_back(two);
@@ -136,7 +136,7 @@ void fill(vector<Point> points)
 /**********************************************************
 Sets the clear color.
 **********************************************************/
-void clm_glClearColor(float r, float g, float b, float a)
+void clm_glClearColor(double r, double g, double b, double a)
 {
    glClearColor(r, g, b, a);
    clearColor.set(r, g, b, a);
@@ -154,9 +154,10 @@ void setPixel(const Point& pixel)
      || pixel.x >= viewport[0] + viewport[2] || pixel.x < viewport[0]
      || pixel.y >= viewport[1] + viewport[3] || pixel.y < viewport[1]
      || (depth_test && (pixel.z >= zBuffer[pixel.x][pixel.y]
-                       || pixel.z < -1 || pixel.z > 1)))
+                       /*|| pixel.z < -1 || pixel.z > 1*/)))
      return;
-     
+   
+        
    int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
    raster[ temp + 0 ] = pixel.color[0];
    raster[ temp + 1 ] = pixel.color[1];
@@ -527,7 +528,7 @@ void clm_glPopMatrix()
 /**********************************************************
 * Specifies a four vector point.
 **********************************************************/
-void clm4f(float x, float y, float z=0.0, float w=1.0)
+void clm4f(double x, double y, double z=0.0, double w=1.0)
 {
    vector4 v(x,y,z,w);
    
@@ -553,7 +554,7 @@ void clm4f(float x, float y, float z=0.0, float w=1.0)
 /**********************************************************
 * Specifies a four vector point.
 **********************************************************/
-void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
+void clm_glVertex4f(double x, double y, double z=0.0, double w=1.0)
 {
    glVertex4f(x, y, z, w);
    clm4f(x,y,z,w);   
@@ -563,7 +564,7 @@ void clm_glVertex4f(float x, float y, float z=0.0, float w=1.0)
 /**********************************************************
 * Calls flVertex4f with z=0.
 **********************************************************/
-void clm_glVertex3f(float x, float y, float z=0) 
+void clm_glVertex3f(double x, double y, double z=0) 
 {clm_glVertex4f(x,y,z);}
 
 /**********************************************************
@@ -620,6 +621,15 @@ void clm_glLoadMatrixd(const double * m)
 void multMatrix(const matrix4& m)
 {
    (*currentMatrixStack)[currentMatrixStack->size() - 1] *= m;
+   return;
+}
+
+/**********************************************************
+* Prints the current matrix.
+**********************************************************/
+void printCurrentMatrix()
+{
+   cout << (*currentMatrixStack)[currentMatrixStack->size() - 1] << endl;
    return;
 }
 
@@ -788,6 +798,7 @@ void clm_fullRotate(double angle, double x, double y, double z,
    matrix4 M = tb*m*t;//TODO Precalculate this.
    
    glMultMatrixd(M.data());
+   
    multMatrix(M);
 
    return;
@@ -805,7 +816,7 @@ void clm_glFrustum(GLdouble left, GLdouble right,
                    GLdouble bottom, GLdouble top,
                    GLdouble zNear, GLdouble zFar )
 {
-   glFrustum(left, right, bottom, top, zNear, zFar);
+   //glFrustum(left, right, bottom, top, zNear, zFar);
    
    
    double A =       (right + left) / (right - left);
@@ -817,6 +828,10 @@ void clm_glFrustum(GLdouble left, GLdouble right,
              0, 2*zNear/(top-bottom),      B, 0,
              0, 0,  C, D,
              0, 0, -1, 0);
+   
+   glMultMatrixd(m.data());
+   multMatrix(m);
+   
    return;
 }                       
 
@@ -834,17 +849,23 @@ void clm_gluPerspective(GLdouble fovy,  GLdouble aspect,
 {
    gluPerspective(fovy, aspect, zNear, zFar);
    
-   double angle = (fovy/2.0)*M_PI/180.0;
+   double angle = (fovy/2.0)*(M_PI/180.0);
    double f  = cos(angle)/sin(angle);
-
+ 
    matrix4 m(f/aspect,      0,              0,              0,
             0,              f,              0,              0,
             0,              0, zFar+zNear/(zNear-zFar), 2*zFar*zNear/(zNear-zFar),
             0,              0,              -1,             0);
+     
+   multMatrix(m);
 
-   
    return;
 }
+
+
+
+
+
 
 
 /**********************************************************
@@ -862,7 +883,7 @@ void draw()
          //Fulstrum
          clm_glMatrixMode(GL_PROJECTION);
          clm_glLoadIdentity();
-         clm_glFrustum(-0.1,0.1, -0.1*480/640,0.1*480/640, 0.1,10);
+         clm_glFrustum(-0.1,0.1, -0.1*480/640.0,0.1*480/640.0, 0.1,10);
          clm_glMatrixMode(GL_MODELVIEW);
          clm_glLoadIdentity();
 
@@ -887,7 +908,7 @@ void draw()
          //Perspective
          clm_glMatrixMode(GL_PROJECTION);
          clm_glLoadIdentity();
-         clm_gluPerspective(90, double(640)/480, .1, 10);
+         clm_gluPerspective(90, double(640)/480.0, .1, 10);
          clm_glMatrixMode(GL_MODELVIEW);
          clm_glLoadIdentity();
 

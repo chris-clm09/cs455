@@ -17,6 +17,7 @@ using namespace std;
 typedef cml::matrix44d_c matrix4;
 typedef cml::vector4d vector4;
 #include "ColorInterpolation.h"
+#include "printGLMatrix.cpp"
 
 //---------------------Forward Declarations----------------
 void setPixel(const Point& pixel);
