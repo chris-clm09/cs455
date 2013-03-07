@@ -796,10 +796,6 @@ void clm_fullRotate(double angle, double x, double y, double z,
 
 
 
-
-
-
-#include "matrixTestCase.h"
 /**********************************************************
 * Draw will call all of my byu functions, which will
 * draw what shapes desired.. etc.
@@ -808,316 +804,47 @@ void draw()
 {
    clm_glClearColor(0,0,0,1);
    clm_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   //clm_glClear(GL_DEPTH_BUFFER_BIT);
-
+   
    switch (drawMode)
    {
       case 0:
-         clm_glViewport(0,0,320,240);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0,1,0);
-           clm_glVertex3f(-1,0,0);
-           clm_glVertex3f(0,-0.8,0);
-           clm_glVertex3f(0.5,0.8,0);
-         clm_glEnd();
-         clm_glViewport(320,240,320,240);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0,0,1);
-           clm_glVertex3f(-1,0.8,0);
-           clm_glVertex3f(0.1,-0.8,0);
-           clm_glVertex3f(0.5,0.8,0);
-         clm_glEnd();
-         //Restore your viewport to the whole screen
-         clm_glViewport(0,0,640,480);   
+
          break;
       case 1: 
-         clm_glBegin(GL_TRIANGLES);
-         clm_glColor3f(1,0,0);
-            clm_glVertex4f(-1,0.2,0,1);
-            clm_glVertex4f(0,0.8,0,1);
-            clm_glVertex4f(1,0.2,0,1);
-         clm_glColor3f(1,0,1);
-            clm_glVertex4f(-1,-0.8,0,2);
-            clm_glVertex4f(0,-0.2,0,2);
-            clm_glVertex4f(1,-0.8,0,2);
-         clm_glEnd();
+
          break;
       case 2:
-         clm_glEnable(GL_DEPTH_TEST);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0,1,1);
-           clm_glVertex3f(-0.5,0.2,0.5);
-           clm_glVertex3f(0,-0.5,0);
-           clm_glVertex3f(0.5,0.2,-0.5);
-           clm_glColor3f(1,1,0);
-           clm_glVertex3f(-0.5,-0.2,-0.5);
-           clm_glVertex3f(0,0.5,0);
-           clm_glVertex3f(0.5,-0.2,0.5);
-         clm_glEnd();
-         clm_glDisable(GL_DEPTH_TEST);
+
          break;   
       case 3:
-         clm_glEnable(GL_DEPTH_TEST);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.5,1,1);
-           clm_glVertex3f(0.5,0,0);
-           clm_glVertex3f(0,0.5,-2);
-           clm_glVertex3f(0,-0.5,2);
-         clm_glEnd();
-         clm_glViewport(50,50,200,400);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(1,1,0.5);
-           clm_glVertex3f(-1.4,-1.2,-0.5);
-           clm_glVertex3f(0,1.2,0);
-           clm_glVertex3f(1.5,-0.2,0.5);
-         clm_glEnd();
-         //Restore your viewport to the whole screen
-         clm_glViewport(0,0,640,480);
-         clm_glDisable(GL_DEPTH_TEST);
-         clm_glLoadIdentity();
+
          break;
       case 4:
-      {
-         double translate[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, -1.2,0.3,0,1};
-         double rotate[16] = {cos(M_PI/2),sin(M_PI/2),0,0, 
-                              -sin(M_PI/2),cos(M_PI/2),0,0, 
-                              0,0,1,0, 0,0,0,1};
-         clm_glLoadIdentity();
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.5,0.2,1);
-           clm_glVertex3f(0.5,0.1,0);
-           clm_glVertex3f(0.8,0.1,0);
-           clm_glVertex3f(0.65,0.4,0);
-         clm_glEnd();
-         clm_glLoadMatrixd(translate);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.5,0.8,0.2);
-           clm_glVertex3f(0.5,0.1,0);
-           clm_glVertex3f(0.8,0.1,0);
-           clm_glVertex3f(0.65,0.4,0);
-         clm_glEnd();
-         clm_glLoadIdentity();
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.2,0.6,1);
-           clm_glVertex3f(0.5,-0.4,0);
-           clm_glVertex3f(0.8,-0.4,0);
-           clm_glVertex3f(0.65,-0.7,0);
-         clm_glEnd();
-         clm_glLoadMatrixd(rotate);
-         clm_glMultMatrixd(translate);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.9,0.2,0.4);
-           clm_glVertex3f(0.5,-0.4,0);
-           clm_glVertex3f(0.8,-0.4,0);
-           clm_glVertex3f(0.65,-0.7,0);
-         clm_glEnd();
-         clm_glLoadIdentity();
-         }
+
          break;
       case 5:
-         matrixTest(); 
-         clm_glDisable(GL_DEPTH_TEST);     
+
          break;
       case 6:
-         //glRotate:
-         clm_glLoadIdentity();
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.5,0.2,1);
-           clm_glVertex3f(0.5,0.1,0);
-           clm_glVertex3f(0.8,0.1,0);
-           clm_glVertex3f(0.65,0.4,0);
-         clm_glEnd();
-         clm_glRotatef(90,0,0,1);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.1,0.2,1);
-           clm_glVertex3f(0.5,0.1,0);
-           clm_glVertex3f(0.8,0.1,0);
-           clm_glVertex3f(0.65,0.4,0);
-         clm_glEnd();
-         clm_glLoadIdentity();
+         //
          break;
       case 7:
-         //glTranslate:
-         clm_glLoadIdentity();
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.33,0.77,0);
-           clm_glVertex3f(0.5,0.1,0);
-           clm_glVertex3f(0.8,0.1,0);
-           clm_glVertex3f(0.65,0.4,0);
-         clm_glEnd();
-         clm_glTranslatef(-1,-1,0);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.77,0.2,0.3);
-           clm_glVertex3f(0.5,0.1,0);
-           clm_glVertex3f(0.8,0.1,0);
-           clm_glVertex3f(0.65,0.4,0);
-         clm_glEnd();
-         clm_glLoadIdentity();
+         //
          break;
       case 8:
-         //glScale:
-         clm_glLoadIdentity();
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.9,0.5,1);
-           clm_glVertex3f(0.5,0.4,0);
-           clm_glVertex3f(0.8,0.4,0);
-           clm_glVertex3f(0.65,0.9,0);
-         clm_glEnd();
-         clm_glScalef(0.8,0.7,1);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.8,0.7,0);
-           clm_glVertex3f(0.5,0.1,0);
-           clm_glVertex3f(0.8,0.1,0);
-           clm_glVertex3f(0.65,0.4,0);
-         clm_glEnd();
-         clm_glLoadIdentity();
+         //
          break;
       case 9:
-         //glOrtho:
-         clm_glLoadIdentity();
-         clm_glOrtho(0,640,0,480,-1,1);
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(1,0,0);
-           clm_glVertex3f(300,300,0);
-           clm_glColor3f(0,1,0);
-           clm_glVertex3f(600,300,0);
-           clm_glColor3f(0,0,1);
-           clm_glVertex3f(450,410,0);
-           clm_glColor3f(1,1,0);
-           clm_glVertex3f(100,400,0);
-           clm_glColor3f(0,1,1);
-           clm_glVertex3f(70,60,0);
-           clm_glColor3f(1,0,1);
-           clm_glVertex3f(350,100,0);
-         clm_glEnd();
-         clm_glLoadIdentity();
+         //
          break;   
       case 10:
-      //Fixed Scale:
-         clm_glDisable(GL_DEPTH_TEST); 
-         clm_glLoadIdentity();
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(.5,.9,1);
-           clm_glVertex3f(0.5,0.4,0);
-           clm_glVertex3f(0.8,0.4,0);
-           clm_glVertex3f(0.65,0.9,0);
-         clm_glEnd();
-         
-         for (double i = .1; i < .8; i+=.1)
-         {
-            clm_fixedScale(0.9-i,0.8-i,0,.5,.4,0);
-            clm_glBegin(GL_TRIANGLES);
-              clm_glColor3f(1,1-i,0);
-              clm_glVertex3f(0.5,0.4,0);
-              clm_glVertex3f(0.8,0.4,0);
-              clm_glVertex3f(0.65,0.9,0);
-            clm_glEnd();
-            clm_glLoadIdentity();
-         }
-         
-         for (double i = -.9; i < -.1; i+=.1)
-         {
-            clm_fixedScale(i,i+.1,0,.5,.4,0);
-            clm_glBegin(GL_TRIANGLES);
-              clm_glColor3f(1,1+i,0);
-              clm_glVertex3f(0.5,0.4,0);
-              clm_glVertex3f(0.8,0.4,0);
-              clm_glVertex3f(0.65,0.9,0);
-            clm_glEnd();
-            clm_glLoadIdentity();
-         }
+      //
          break;
       case 11:
-      //clm_shear
-         clm_glDisable(GL_DEPTH_TEST);
-         clm_glLoadIdentity();
-         clm_glBegin(GL_QUADS);
-            clm_glColor3f(1,0,0);
-            clm_glVertex2f(.1,.1);
-            clm_glColor3f(0,1,0);
-            clm_glVertex2f(.1,.3);
-            clm_glColor3f(0,0,1);
-            clm_glVertex2f(.3,.3);
-            clm_glColor3f(1,1,0);
-            clm_glVertex2f(.3,.1);
-         clm_glEnd();
-         
-         clm_shear(.9, 0, 0, 0, 0, 0);
-         clm_glBegin(GL_QUADS);
-            clm_glColor3f(1,0,0);
-            clm_glVertex2f(.1,.1);
-            clm_glColor3f(0,1,0);
-            clm_glVertex2f(.1,.3);
-            clm_glColor3f(0,0,1);
-            clm_glVertex2f(.3,.3);
-            clm_glColor3f(1,1,0);
-            clm_glVertex2f(.3,.1);
-         clm_glEnd();
-         clm_glLoadIdentity();
-         
-         clm_shear(0, 0, .9, 0, 0, 0);
-         clm_glBegin(GL_QUADS);
-            clm_glColor3f(1,0,0);
-            clm_glVertex2f(.1,.1);
-            clm_glColor3f(0,1,0);
-            clm_glVertex2f(.1,.3);
-            clm_glColor3f(0,0,1);
-            clm_glVertex2f(.3,.3);
-            clm_glColor3f(1,1,0);
-            clm_glVertex2f(.3,.1);
-         clm_glEnd();
-         clm_glLoadIdentity();
-         
-         clm_shear(.9, 0, .9, 0, 0, 0);
-         clm_glBegin(GL_QUADS);
-            clm_glColor3f(1,0,0);
-            clm_glVertex2f(.1,.1);
-            clm_glColor3f(0,1,0);
-            clm_glVertex2f(.1,.3);
-            clm_glColor3f(0,0,1);
-            clm_glVertex2f(.3,.3);
-            clm_glColor3f(1,1,0);
-            clm_glVertex2f(.3,.1);
-         clm_glEnd();
-         clm_glLoadIdentity();
-         
-         
+      //
          break;
       case 12:
-          //glRotate:
-         clm_glDisable(GL_DEPTH_TEST);
-         clm_glLoadIdentity();
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0.5,0.2,1);
-           clm_glVertex3f(0.5,0.1,0);
-           clm_glVertex3f(0.8,0.1,0);
-           clm_glVertex3f(0.65,0.4,0);
-         clm_glEnd();
-            
-         for (double i = 45; i < 360; i += 45)
-         {
-            clm_fullRotate(i,0,0,1,.5,.1,0);
-            clm_glBegin(GL_TRIANGLES);
-              clm_glColor3f(0.1 + (i/45)/10.0,0.1+ (i/45)/10.0,.5);
-              clm_glVertex3f(0.5,0.1,0);
-              clm_glVertex3f(0.8,0.1,0);
-              clm_glVertex3f(0.65,0.4,0);
-            clm_glEnd();
-            clm_glLoadIdentity();
-         }
-         
-         for (double i = 45; i < 360; i += 45)
-         {
-            clm_fullRotate(i,1,1,1,-.5,.1,0);
-            clm_glBegin(GL_TRIANGLES);
-              clm_glColor3f(0.1 + (i/45)/10.0,0.1+ (i/45)/10.0,.5);
-              clm_glVertex3f(-0.5,0.1,0);
-              clm_glVertex3f(-0.8,0.1,0);
-              clm_glVertex3f(-0.65,0.4,0);
-            clm_glEnd();
-            clm_glLoadIdentity();
-         }
-         
+          //
       break;
       default:
          cout << "Unknown drawMode! I'm bailing!" << endl;
