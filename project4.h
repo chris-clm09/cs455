@@ -18,6 +18,7 @@ typedef cml::matrix44d_c matrix4;
 typedef cml::vector4d vector4;
 #include "ColorInterpolation.h"
 #include "printGLMatrix.cpp"
+#include "light.cpp"
 
 //---------------------Forward Declarations----------------
 void setPixel(const Point& pixel);
@@ -57,6 +58,11 @@ matrix4 inverseTransOfModelView(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 vector4 viewport(0,0,0,0);//xmin, ymin, width, height
 matrix4 identityMatrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+
+//-----------------------------------------------------
+//Lights
+Light lights[8];
+
 
 //-------------------PRINT CRAP--------------------------------------
 void pp(vector4 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}
