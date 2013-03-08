@@ -540,29 +540,45 @@ void clm_glPopMatrix()
 }
 
 /**********************************************************
+* Generates the light on a point with a given normal.
+**********************************************************/
+vector4 genLightOnVertex(vector4 &p, vector4 &n)
+{
+   vector4 light(0,0,0,0);
+
+   for(int i=0; i<8; i++)
+      if (lights[i].enabled)
+         light += ligts[0].ambientColor 
+               + max(0, cml::dot(n, (ligts[0].position - p).normalize())) 
+               * ligts[0].deffuseColor;
+
+   return light;
+}
+
+/**********************************************************
 * Specifies a four vector point.
 **********************************************************/
 void clm4f(double x, double y, double z=0.0, double w=1.0)
 {
    vector4 v(x,y,z,w);
    
-   //  Projection               ModelView
-   v = matrixStacks[1].back() * matrixStacks[0].back() * v;
+   //ModelView
+   v = matrixStacks[0].back() * v;
+
+   vector4 norm  = inverseTransOfModelView * normal;
+   vector4 light = genLightOnVertex(v, normal);
+
+   //  Projection               
+   v = matrixStacks[1].back() * v;
    
    //Divid by W
    v /= v[3];
-   
-   //Size to your viewport. Basically, add 1 to all x and y coordinates, 
-   //and then divide by two. This will put all your points between 0,0 and 
-   //1,1. Then, multiply your x coordinate by the viewport width and add the 
-   //x viewport min. Do the same to your y coordinate with the height and y 
-   //viewport min.
+
+   //Size to the Viewport   
    v[0] = ((v[0]+1)/2.0) * viewport[2] + viewport[0];
    v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
-   
-   vector4 norm = inverseTransOfModelView * normal;
         
-   drawVertex(Point(round(v[0]), round(v[1]), v[2], v[3], penColor, norm));
+   drawVertex(Point(round(v[0]), round(v[1]), v[2], v[3], penColor, norm, light));
    
    return;
 }
@@ -797,6 +813,8 @@ void clm_shear(double sxy, double sxz, double syx,
 }
 
 
+/**********************************************************
+**********************************************************/
 void clm_fullRotate(double angle, double x, double y, double z, 
                                 double bx, double by, double bz)
 {
