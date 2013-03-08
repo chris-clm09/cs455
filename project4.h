@@ -60,7 +60,7 @@ vector4 viewport(0,0,0,0);//xmin, ymin, width, height
 matrix4 identityMatrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 //-----------------------------------------------------
-//Lights
+//Lights (Ligth0 == 16384)
 Light lights[8];
 
 

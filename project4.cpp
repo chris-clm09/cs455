@@ -546,7 +546,7 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
 {
    vector4 v(x,y,z,w);
    
-   //  Projection                ModelView
+   //  Projection               ModelView
    v = matrixStacks[1].back() * matrixStacks[0].back() * v;
    
    //Divid by W
