@@ -33,7 +33,9 @@ const int RASTER_SIZE   = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
 const int Z_BUFFER_SIZE = SCREEN_HEIGHT * SCREEN_WIDTH;
 
 vector4 clearColor(0,0,0,0);
-vector4 penColor(0,0,0,0);
+vector4 penColor(1,1,1,1);
+vector4 normal(1,1,1,0);
+
 float raster[RASTER_SIZE];
 double zBuffer[SCREEN_WIDTH][SCREEN_HEIGHT];
 GLenum glDrawMode;
@@ -48,8 +50,10 @@ bool depth_test = false;
 //-----------------------------------------------------
 //Matricies Stacks
 //Two stacks one for gl_modelview and gl_projection
+GLenum matrixMode;
 vector<matrix4> matrixStacks[2];
 vector<matrix4> * currentMatrixStack;
+matrix4 inverseTransOfModelView(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 vector4 viewport(0,0,0,0);//xmin, ymin, width, height
 matrix4 identityMatrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);

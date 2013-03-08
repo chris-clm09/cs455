@@ -231,11 +231,11 @@ void clm_glBegin(GLenum eVar)
 This function will save the given point and return if 
 the desired number of points has been reached.
 **********************************************************/
-bool saveAndReachedPoints(int num, int x, int y, double z, double w)
+bool saveAndReachedPoints(int num, Point &p)
 {
    if (savedPoints.size() < num)
    {  //save
-      savedPoints.push_back(Point(x,y,z,w,penColor));
+      savedPoints.push_back(p);
       return savedPoints.size() == num;
    }
    else 
@@ -249,13 +249,13 @@ bool saveAndReachedPoints(int num, int x, int y, double z, double w)
 /**********************************************************
 Draws a strip between two points.
 **********************************************************/
-void drawStrip(int x, int y, double z, double w)
+void drawStrip(Point &p)
 {
    if (savedPoints.size() == 0)
-      saveAndReachedPoints(2, x, y, z, w);
+      saveAndReachedPoints(2, p);
    else
    {
-      saveAndReachedPoints(2,x,y,z,w);
+      saveAndReachedPoints(2, p);
       drawLine(savedPoints[0], savedPoints[1]);
                
       savedPoints.erase(savedPoints.begin());
@@ -266,14 +266,14 @@ void drawStrip(int x, int y, double z, double w)
 /**********************************************************
 * Set's raster pixels given current drawing mode.
 **********************************************************/
-void drawVertex(int x, int y, double z, double w)
+void drawVertex(Point p)
 {
    if (glDrawMode == GL_POINTS) 
-      setPixel(Point(x, y, z, w, penColor));
+      setPixel(p);
    else if (glDrawMode == GL_LINES)
    {
       int numPointsInLine = 2;
-      if (saveAndReachedPoints(numPointsInLine, x, y, z, w))
+      if (saveAndReachedPoints(numPointsInLine, p))
       {
          drawLine(savedPoints[0], savedPoints[1]);
          savedPoints.clear();
@@ -282,7 +282,7 @@ void drawVertex(int x, int y, double z, double w)
 	else if (glDrawMode == GL_TRIANGLES)
 	{
 	   int numPointsInTri = 3;
-      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
+      if (saveAndReachedPoints(numPointsInTri, p))
       {
          vector<Point> points;
          vector<Point> temp;
@@ -302,20 +302,20 @@ void drawVertex(int x, int y, double z, double w)
    //vertices n and n + 1 define line segment n.
    else if (glDrawMode == GL_LINE_STRIP)
    {
-      drawStrip(x,y,z,w);
+      drawStrip(p);
    }
    //Exactly like GL_LINE_STRIP except one additional line is draw between 
    //the first and last calls to glVertex2i when glEnd is called.
    else if (glDrawMode == GL_LINE_LOOP)
    {
       if (firstPt.eq(Point(-1,-1,-1,-1)))
-         firstPt.set(x,y,z,w,penColor);
-      drawStrip(x,y,z,w);
+         firstPt = p;
+      drawStrip(p);
    }
    else if (glDrawMode == GL_TRIANGLE_STRIP)//Draws a connected group of triangles.
    {
       int numPointsInTri = 3;
-      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
+      if (saveAndReachedPoints(numPointsInTri, p))
       {
          vector<Point> points;
          vector<Point> temp;
@@ -335,7 +335,7 @@ void drawVertex(int x, int y, double z, double w)
             glDrawMode == GL_POLYGON)//Draws a connected group of triangles. 
    {
       int numPointsInTri = 3;
-      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
+      if (saveAndReachedPoints(numPointsInTri, p))
       {
          vector<Point> points;
          vector<Point> temp;
@@ -354,7 +354,7 @@ void drawVertex(int x, int y, double z, double w)
    else if (glDrawMode == GL_QUADS)
    {
       int numPointsInTri = 4;
-      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
+      if (saveAndReachedPoints(numPointsInTri, p))
       {
          vector<Point> points;
          vector<Point> temp;
@@ -375,7 +375,7 @@ void drawVertex(int x, int y, double z, double w)
    else if (glDrawMode == GL_QUAD_STRIP)
    {
       int numPointsInTri = 4;
-      if (saveAndReachedPoints(numPointsInTri, x, y, z, w))
+      if (saveAndReachedPoints(numPointsInTri, p))
       {
          vector<Point> points;
          vector<Point> temp;
@@ -411,7 +411,7 @@ void clm_glEnd()
    glEnd();
    
    if (glDrawMode == GL_LINE_LOOP)
-      drawStrip(firstPt.x, firstPt.y, firstPt.z, firstPt.w);
+      drawStrip(firstPt);
    
    savedPoints.clear();
    firstPt.clear();
@@ -443,7 +443,16 @@ void clm_glLineWidth(int lwidth)
 
 
 
-
+/**********************************************************
+* Update the inverse transpose of the model view matrix
+* if nessisary.
+**********************************************************/
+void updateInTrans(matrix4 &m)
+{
+   if (matrixMode == GL_MODELVIEW)
+      inverseTransOfModelView = m.transpose().inverse();
+   return;
+}
 
 /**********************************************************
 * This function will generate a new matrix based off of
@@ -468,6 +477,8 @@ matrix4 createMatrix(const double* m)
 void clm_glMatrixMode(GLenum mode)
 {
    glMatrixMode(mode);
+
+   matrixMode = mode;
 
    switch (mode)
    {
@@ -518,7 +529,10 @@ void clm_glPopMatrix()
 {
    glPopMatrix();
    if (currentMatrixStack->size() > 1)
+   {
       currentMatrixStack->pop_back();
+      updateInTrans(currentMatrixStack->back());
+   }
    else
       cout << "Warning: You tried to pop the matrix stack w/ Size == 1\n";
       
@@ -545,8 +559,10 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
    //viewport min.
    v[0] = ((v[0]+1)/2.0) * viewport[2] + viewport[0];
    v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
+   
+   vector4 norm = inverseTransOfModelView * normal;
         
-   drawVertex(round(v[0]), round(v[1]), v[2], v[3]);
+   drawVertex(Point(round(v[0]), round(v[1]), v[2], v[3], penColor, norm));
    
    return;
 }
@@ -598,6 +614,7 @@ void clm_glLoadIdentity()
 {
    glLoadIdentity();
    currentMatrixStack->push_back(identityMatrix);
+   updateInTrans(identityMatrix);
    return;
 }
 
@@ -610,7 +627,11 @@ void clm_glLoadIdentity()
 void clm_glLoadMatrixd(const double * m)
 {
    glLoadMatrixd(m);
-   currentMatrixStack->push_back(createMatrix(m));
+   
+   matrix4 M = createMatrix(m);
+   currentMatrixStack->push_back(M);
+   updateInTrans(M);
+   
    return;
 }
 
@@ -621,6 +642,7 @@ void clm_glLoadMatrixd(const double * m)
 void multMatrix(const matrix4& m)
 {
    (*currentMatrixStack)[currentMatrixStack->size() - 1] *= m;
+   updateInTrans((*currentMatrixStack)[currentMatrixStack->size() - 1]);
    return;
 }
 
@@ -816,7 +838,7 @@ void clm_glFrustum(GLdouble left, GLdouble right,
                    GLdouble bottom, GLdouble top,
                    GLdouble zNear, GLdouble zFar )
 {
-   //glFrustum(left, right, bottom, top, zNear, zFar);
+   glFrustum(left, right, bottom, top, zNear, zFar);
    
    
    double A =       (right + left) / (right - left);
@@ -829,7 +851,6 @@ void clm_glFrustum(GLdouble left, GLdouble right,
              0, 0,  C, D,
              0, 0, -1, 0);
    
-   glMultMatrixd(m.data());
    multMatrix(m);
    
    return;
@@ -862,7 +883,16 @@ void clm_gluPerspective(GLdouble fovy,  GLdouble aspect,
    return;
 }
 
-
+/**********************************************************
+* glNormal
+* Set the current Normal Vector.
+**********************************************************/
+void clm_glNormal3f(double x, double y, double z)
+{
+   glNormal3f(x,y,z);
+   normal.set(x,y,z,0);
+   return;
+}
 
 
 

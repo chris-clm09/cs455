@@ -5,50 +5,48 @@ typedef cml::vector4d vector4;
 class Point
 {
 public:
-   void init(int x, int y, double z, double w, vector4 color)
+   void init(int x, int y, double z, double w, vector4 color, vector4 norm)
    {
       this->x = x;
 		this->y = y;
 		this->z = z;
 		this->w = w;
 		this->color = color;
+		this->normal = norm;
    }
 
 	Point(int x, int y, double z, double w, vector4 color)
 	{
-	   init(x,y,z,w,color);	
+	   init(x,y,z,w,color,vector4(0,0,0,0));	
 	}
 	
 	Point(int x, int y)
 	{
-	   init(x,y,0,1,vector4(0,0,0,0));
+	   init(x,y,0,1,vector4(0,0,0,0),vector4(0,0,0,0));
 	}
 	
 	Point(int x, int y, double z, double w)
 	{
-	   init(x,y,z,w,vector4(0,0,0,0));
+	   init(x,y,z,w,vector4(0,0,0,0),vector4(0,0,0,0));
 	}
 	
-	bool operator<(const Point& rhs)
+	Point(int x, int y, double z, double w, vector4 color, vector4 norm)
 	{
-	   return x < rhs.x && y < rhs.y;
+	   init(x,y,z,w,color,norm);
 	}
 	
-	bool eq(const Point& p)
-	{ return x == p.x && y == p.y &&
-	         z == p.z && w == p.w; }
-	
-	void set(int x, int y, double z, double w, vector4 color)
-	{init(x,y,z,w,color);}
-	
-	void clear()
-	{init(-1,-1,-1,-1,vector4(0,0,0,0));}
+	bool operator<(const Point& rhs) { return x < rhs.x && y < rhs.y;}
+	bool eq(const Point& p) {return x == p.x && y == p.y && z == p.z && w == p.w;}
+	void set(int x, int y, double z, double w, vector4 color, vector4 norm) 
+	{init(x,y,z,w,color, norm);}
+	void clear() {init(-1,-1,-1,-1,vector4(0,0,0,0),vector4(0,0,0,0));}
 	
 	int    x;
 	int    y;
 	double z;
 	double w;
 	vector4 color;
+	vector4 normal;
 };
 
 struct less_key
