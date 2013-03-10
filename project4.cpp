@@ -548,9 +548,9 @@ vector4 genLightOnVertex(vector4 &p, vector4 &n)
 
    for(int i=0; i<8; i++)
       if (lights[i].enabled)
-         light += ligts[0].ambientColor 
-               + max(0, cml::dot(n, (ligts[0].position - p).normalize())) 
-               * ligts[0].deffuseColor;
+         light += lights[0].ambientColor 
+               + max(0.0, cml::dot(n, (lights[0].position - p).normalize())) 
+               * lights[0].deffuseColor;
 
    return light;
 }
