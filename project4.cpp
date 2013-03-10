@@ -144,6 +144,35 @@ void clm_glClearColor(double r, double g, double b, double a)
 }
 
 /**********************************************************
+This function will generate the color of a pixel based on
+light and texture.
+**********************************************************/
+vector4 elementTimes(const vector4 &one, const vector4& two)
+{
+   return vector4(
+      one[0] * two[0],
+      one[1] * two[1],
+      one[2] * two[2],
+      one[3] * two[3]
+      );
+}
+
+/**********************************************************
+This function will generate the color of a pixel based on
+light and texture.
+**********************************************************/
+vector4 genPixColor(const Point &pixel)
+{
+   if (color_test && material_test)
+      return elementTimes(pixel.light, pixel.color);
+   else if (color_test)
+      return elementTimes(pixel.light, vector4(.8, .8, .8, 1)) + 
+                         vector4(.2, .2, .2, 0);
+   else
+      return pixel.color;
+}
+
+/**********************************************************
 This function will set the color of a pixel.
 **********************************************************/
 void setPixel(const Point& pixel)
@@ -159,9 +188,13 @@ void setPixel(const Point& pixel)
    
         
    int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
-   raster[ temp + 0 ] = pixel.color[0];
-   raster[ temp + 1 ] = pixel.color[1];
-   raster[ temp + 2 ] = pixel.color[2];
+   
+   //Generate pixel color
+   vector4 color = genPixColor(pixel);
+
+   raster[ temp + 0 ] = color[0];
+   raster[ temp + 1 ] = color[1];
+   raster[ temp + 2 ] = color[2];
    
    if (depth_test)
       zBuffer[pixel.x][pixel.y]  = pixel.z;
@@ -691,6 +724,8 @@ void clm_glEnable(GLenum mask)
    
    if (mask & GL_DEPTH_TEST)
       depth_test = true;
+
+   //TODO ... Start HERE!
    
    return;
 }
