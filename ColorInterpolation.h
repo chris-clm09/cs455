@@ -42,8 +42,8 @@ double interpolateZ(Point one, Point two, float fraction)
 vector4 interpolateLight(Point one, Point two, double fraction)
 {
    vector4 oLight = one.light;
-   vector4 tLight = two.lgiht;
-   
+   vector4 tLight = two.light;
+
    vector4 polated(
       tLight[0] - oLight[0] * fraction + oLight[0],
       tLight[1] - oLight[1] * fraction + oLight[1],

@@ -912,6 +912,42 @@ void clm_glNormal3f(double x, double y, double z)
    return;
 }
 
+/**********************************************************
+* Modifies the current systems light configuration.
+**********************************************************/
+void clm_glLightfv(GLenum light, GLenum pname, const GLfloat *params)
+{
+   glLightfv(light, pname, params);
+
+   switch (pname)
+   {
+      case (GL_DIFFUSE):
+         lights[light - GL_LIGHT0].setDeffuseColor(vector4(
+                                    params[0], params[1],
+                                    params[2], params[3]));
+      break;
+
+      case (GL_AMBIENT):
+         lights[light - GL_LIGHT0].setAmbientColor(vector4(
+                                    params[0], params[1],
+                                    params[2], params[3]));         
+      break;
+      
+      case (GL_POSITION):
+         lights[light - GL_LIGHT0].setPosition(vector4(
+                                    params[0], params[1],
+                                    params[2], params[3]));
+      break;
+      default:
+         cout << "Warrning: "
+              << "I Don't know how to perform this light operation.\n";
+      break;
+   }
+   return;
+}
+
+
+
 
 
 
@@ -978,7 +1014,46 @@ void draw()
          clm_glEnd();
          break;
       case 2:
+         //G Shading
+      {
+         clm_glMatrixMode(GL_PROJECTION);
+         clm_glLoadIdentity();
+         clm_glMatrixMode(GL_MODELVIEW);
+         clm_glLoadIdentity();
 
+         clm_glEnable(GL_NORMALIZE);
+         clm_glEnable(GL_LIGHTING);
+         clm_glEnable(GL_COLOR_MATERIAL);
+         clm_glEnable(GL_LIGHT0);
+         float diffuse_color[4] = {1.0,1.0,1.0,1};
+         float ambient_color[4] = {0.1,0.1,0.1,1};
+         float position[4] = {0,3,-10,1};
+         clm_glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_color);
+         clm_glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_color);
+         clm_glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+         clm_glColor3f(1,0,0);
+         float dp = M_PI/24; // 16 picked arbitrarily; try other numbers too
+         clm_glBegin(GL_TRIANGLES);
+         for(float theta = 0; theta < 2*M_PI; theta+=dp){
+           for(float phi = 0; phi < M_PI; phi+=dp){
+             clm_glNormal3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glVertex3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glNormal3f(cos(theta+dp)*sin(phi), cos(phi), sin(theta+dp)*sin(phi));
+             clm_glVertex3f(cos(theta+dp)*sin(phi), cos(phi), sin(theta+dp)*sin(phi));
+             clm_glNormal3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glVertex3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glNormal3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glVertex3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glNormal3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glVertex3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glNormal3f(cos(theta)*sin(phi+dp), cos(phi+dp), sin(theta)*sin(phi+dp));
+             clm_glVertex3f(cos(theta)*sin(phi+dp), cos(phi+dp), sin(theta)*sin(phi+dp));
+           }
+         }
+         clm_glEnd();
+         clm_glDisable(GL_LIGHTING);
+      }
          break;   
       case 3:
 

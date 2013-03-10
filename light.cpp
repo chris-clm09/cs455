@@ -27,10 +27,10 @@ public:
       return;
    }
    
-   void setDeffuseColor(vector4 &defColor) { deffuseColor = defColor; }
-   void setAmbientColor(vector4 &ambColor) { ambientColor = ambColor; }
-   void setPosition(vector4 &setPosition)  { position     = setPosition; }   
-   void setEnabled(bool enabledVal)        { enabled      = enabledVal;}
+   void setDeffuseColor(const vector4 &defColor) { deffuseColor = defColor; }
+   void setAmbientColor(const vector4 &ambColor) { ambientColor = ambColor; }
+   void setPosition(const vector4 &setPosition)  { position     = setPosition; }   
+   void setEnabled(bool enabledVal)              { enabled      = enabledVal;}
    
    //Member DATA
    vector4 deffuseColor;
