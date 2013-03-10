@@ -21,7 +21,7 @@ public:
    /**********************************************************
    * Default Constructor
    **********************************************************/
-   Light(): deffuseColor(1,1,1,1), ambientColor(1,1,1,1),
+   Light(): deffuseColor(1,1,1,1), ambientColor(0,0,0,1),
      position(0,0,1,0), enabled(false)
    {
       return;

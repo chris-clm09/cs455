@@ -37,6 +37,23 @@ double interpolateZ(Point one, Point two, float fraction)
 }
 
 /**********************************************************
+* This function will return the interpolated the z value.
+**********************************************************/
+vector4 interpolateLight(Point one, Point two, double fraction)
+{
+   vector4 oLight = one.light;
+   vector4 tLight = two.lgiht;
+   
+   vector4 polated(
+      tLight[0] - oLight[0] * fraction + oLight[0],
+      tLight[1] - oLight[1] * fraction + oLight[1],
+      tLight[2] - oLight[2] * fraction + oLight[2],
+      tLight[3] - oLight[3] * fraction + oLight[3]
+      );
+   return polated;
+}
+
+/**********************************************************
 * This function will return the interpolated color
 * based on a certin fraction.
 * Source:

@@ -15,7 +15,7 @@
 using namespace std;
 
 typedef cml::matrix44d_c matrix4;
-typedef cml::vector4d vector4;
+typedef cml::vector4d    vector4;
 #include "ColorInterpolation.h"
 #include "printGLMatrix.cpp"
 #include "light.cpp"
@@ -44,9 +44,11 @@ vector<Point> savedPoints;
 Point firstPt(-1,-1, -1, -1, vector4(-1,-1,-1,-1));
 int lineWidth = 1;
 
-int drawMode    = 0;
-int mymode      = 0;
-bool depth_test = false;
+int drawMode        = 0;
+int mymode          = 0;
+bool depth_test     = false;
+bool color_test     = false;
+bool material _test = false;
 
 //-----------------------------------------------------
 //Matricies Stacks
