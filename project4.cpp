@@ -722,11 +722,18 @@ void clm_glEnable(GLenum mask)
 { 
    glEnable(mask);
    
-   if (mask & GL_DEPTH_TEST)
-      depth_test = true;
+   if (mask & GL_DEPTH_TEST) depth_test = true;
 
-   //TODO ... Start HERE!
-   
+   //Lights0-7
+   if (mask >= GL_LIGHT0 && mask <= GL_LIGHT0 + 7)
+      lights[mask - GL_LIGHT0].enabled = true;
+
+   //GL_LIGHTING
+   if (mask & GL_LIGHTING) color_test = true;
+
+   //GL_COLOR_MATERIAL
+   if (mask & GL_COLOR_MATERIAL) material_test = true;
+
    return;
 }
 
@@ -739,7 +746,17 @@ void clm_glDisable(GLenum mask)
    
    if (mask & GL_DEPTH_TEST || mask == GL_DEPTH_TEST)
       depth_test = false;
-   
+
+   //Lights0-7
+   if (mask >= GL_LIGHT0 && mask <= GL_LIGHT0 + 7)
+      lights[mask - GL_LIGHT0].enabled = false;
+
+   //GL_LIGHTING
+   if (mask & GL_LIGHTING) color_test = false;
+
+   //GL_COLOR_MATERIAL
+   if (mask & GL_COLOR_MATERIAL) material_test = false;
+
    return;
 }
 
