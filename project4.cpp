@@ -137,6 +137,7 @@ Sets the clear color.
 void clm_glClearColor(double r, double g, double b, double a)
 {
    glClearColor(r, g, b, a);
+   if (!redraw) return;
    clearColor.set(r, g, b, a);
    return;
 }
@@ -155,6 +156,7 @@ vector4 elementTimes(const vector4 &one, const vector4& two)
       );
 }
 
+vector4 addMe(.2, .2, .2, 0);
 /**********************************************************
 This function will generate the color of a pixel based on
 light and texture.
@@ -164,14 +166,10 @@ vector4 genPixColor(const Point &pixel)
    if (color_test && material_test)
       return elementTimes(pixel.light, pixel.color);
    else if (color_test)
-      return elementTimes(pixel.light, vector4(.8, .8, .8, 1)) + 
-                         vector4(.2, .2, .2, 0);
+      return elementTimes(pixel.light, vector4(.8, .8, .8, 1)) + addMe;
    else
       return pixel.color;
 }
-
-vector4 test(0,0,0,1);
-vector4 textz(0,0,0,0);
 
 /**********************************************************
 This function will set the color of a pixel.
@@ -193,9 +191,6 @@ void setPixel(const Point& pixel)
    //Generate pixel color
    vector4 color = genPixColor(pixel);
    
-//   if (pixel.color != test && pixel.light != textz)
-  //  cout << color << "<" << pixel.light << "<" << pixel.color << endl;
-
    raster[ temp + 0 ] = color[0];
    raster[ temp + 1 ] = color[1];
    raster[ temp + 2 ] = color[2];
@@ -224,6 +219,7 @@ Fill raster via color.
 void fillRasterWColor(vector4 color, int x_start = 0, int x_max = SCREEN_WIDTH 
                                    , int y_start = 0, int y_max = SCREEN_HEIGHT)
 {
+   if (!redraw) return;
    bool oldTest = depth_test;
    depth_test   = false;
    
@@ -242,6 +238,7 @@ void clm_glClear(GLint bit)
 {
    glClear(bit);
    
+   if (!redraw) return;
    if (bit & GL_DEPTH_BUFFER_BIT)
       initZBuffer();
   
@@ -259,6 +256,8 @@ explained more below.
 void clm_glBegin(GLenum eVar)
 {
    glBegin(eVar);
+
+   if (!redraw) return;
    glDrawMode = eVar;
    firstPt.clear();
    return;
@@ -447,6 +446,7 @@ void clm_glEnd()
 {
    glEnd();
    
+   if (!redraw) return;
    if (glDrawMode == GL_LINE_LOOP)
       drawStrip(firstPt);
    
@@ -463,6 +463,8 @@ glColor3f(r,g,b) sets it to (r,g,b,1).
 void clm_glColor3f(double r, double g, double b)
 {
    glColor3f(r, g, b);
+
+   if (!redraw) return;
    penColor.set(r, g, b, 1.0);
    return;
 }
@@ -474,6 +476,8 @@ This function will set the pen width.
 void clm_glLineWidth(int lwidth)
 {
    glLineWidth(lwidth);
+
+   if (!redraw) return;
    lineWidth = lwidth;
    return;
 }
@@ -515,6 +519,7 @@ void clm_glMatrixMode(GLenum mode)
 {
    glMatrixMode(mode);
 
+   if (!redraw) return;
    matrixMode = mode;
 
    switch (mode)
@@ -540,6 +545,8 @@ void clm_glMatrixMode(GLenum mode)
 void clm_glViewport(int x , int y, int width, int height)
 {
    glViewport(x, y, width, height);
+
+   if (!redraw) return;
    viewport.set(x,y,width,height);
    return;
 }
@@ -553,6 +560,8 @@ void clm_glViewport(int x , int y, int width, int height)
 void clm_glPushMatrix()
 {
    glPushMatrix();
+
+   if (!redraw) return;
    matrix4 m = currentMatrixStack->back();
    currentMatrixStack->push_back(m);
    return;
@@ -565,6 +574,8 @@ void clm_glPushMatrix()
 void clm_glPopMatrix()
 {
    glPopMatrix();
+
+   if (!redraw) return;
    if (currentMatrixStack->size() > 1)
    {
       currentMatrixStack->pop_back();
@@ -627,6 +638,7 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
 void clm_glVertex4f(double x, double y, double z=0.0, double w=1.0)
 {
    glVertex4f(x, y, z, w);
+   if (!redraw) return;
    clm4f(x,y,z,w);   
    return;
 }
@@ -643,6 +655,8 @@ void clm_glVertex3f(double x, double y, double z=0)
 void clm_glVertex2f(double x, double y)
 {
    glVertex2f(x, y);
+
+   if (!redraw) return;
    clm4f(x, y);
 }
 
@@ -655,6 +669,8 @@ glVertex2i(x,y) specifies the 4-vector point (x,y,0,1).
 void clm_glVertex2i(int x, int y)
 {
    glVertex2i(x,y);
+
+   if (!redraw) return;
    clm_glVertex4f(x,y);
    return;
 }
@@ -667,6 +683,8 @@ void clm_glVertex2i(int x, int y)
 void clm_glLoadIdentity()
 {
    glLoadIdentity();
+
+   if (!redraw) return;
    currentMatrixStack->push_back(identityMatrix);
    updateInTrans(identityMatrix);
    return;
@@ -682,6 +700,7 @@ void clm_glLoadMatrixd(const double * m)
 {
    glLoadMatrixd(m);
    
+   if (!redraw) return;
    matrix4 M = createMatrix(m);
    currentMatrixStack->push_back(M);
    updateInTrans(M);
@@ -716,6 +735,8 @@ void printCurrentMatrix()
 void clm_glMultMatrixd(const double * m)
 {
    glMultMatrixd(m);
+
+   if (!redraw) return;
    multMatrix(createMatrix(m));
    return;
 }
@@ -778,6 +799,7 @@ void clm_glRotatef(double angle, double x, double y, double z)
 {
    glRotatef(angle,x,y,z);
    
+   if (!redraw) return;
    double s = sin(angle*M_PI/180.0);
    double c = cos(angle*M_PI/180.0);
    
@@ -797,6 +819,7 @@ void clm_glTranslatef(GLfloat x, GLfloat y, GLfloat z)
 {
    glTranslatef(x,y,z);
    
+   if (!redraw) return;
    matrix4 m(1, 0, 0, x,
              0, 1, 0, y,
              0, 0, 1, z,
@@ -812,7 +835,8 @@ void clm_glTranslatef(GLfloat x, GLfloat y, GLfloat z)
 void clm_glScalef(GLfloat x, GLfloat y, GLfloat z)
 {
    glScalef(x,y,z);
-
+   
+   if (!redraw) return;
    matrix4 m(x, 0, 0, 0,
              0, y, 0, 0, 
              0, 0, z, 0,
@@ -830,6 +854,7 @@ void clm_glOrtho(GLdouble left, GLdouble right, GLdouble bottom,
 {
    glOrtho(left, right, bottom, top, zNear, zFar);
    
+   if (!redraw) return;
    double tx = - (right + left)   / (right - left);
    double ty = - (top   + bottom) / (top   - bottom);
    double tz = - (zFar  + zNear)  / (zFar  - zNear);
@@ -855,6 +880,8 @@ void clm_fixedScale(double sx, double sy, double sz,
              0, 0, 0,  1);
    
    glMultMatrixd(M.data());
+
+   if (!redraw) return;
    multMatrix(M);
    return;
 }
@@ -871,6 +898,8 @@ void clm_shear(double sxy, double sxz, double syx,
              0, 0, 0, 1);
              
    glMultMatrixd(M.data());
+
+   if (!redraw) return;
    multMatrix(M);
    return;
 }
@@ -902,6 +931,7 @@ void clm_fullRotate(double angle, double x, double y, double z,
    
    glMultMatrixd(M.data());
    
+   if (!redraw) return;
    multMatrix(M);
 
    return;
@@ -921,6 +951,7 @@ void clm_glFrustum(GLdouble left, GLdouble right,
 {
    glFrustum(left, right, bottom, top, zNear, zFar);
    
+   if (!redraw) return;
    
    double A =       (right + left) / (right - left);
    double B =       (top + bottom) / (top - bottom);
@@ -951,6 +982,7 @@ void clm_gluPerspective(GLdouble fovy,  GLdouble aspect,
 {
    gluPerspective(fovy, aspect, zNear, zFar);
    
+   if (!redraw) return;
    double angle = (fovy/2.0)*(M_PI/180.0);
    double f  = cos(angle)/sin(angle);
  
@@ -971,6 +1003,8 @@ void clm_gluPerspective(GLdouble fovy,  GLdouble aspect,
 void clm_glNormal3f(double x, double y, double z)
 {
    glNormal3f(x,y,z);
+
+   if (!redraw) return;
    normal.set(x,y,z,0);
    return;
 }
@@ -981,6 +1015,8 @@ void clm_glNormal3f(double x, double y, double z)
 void clm_glLightfv(GLenum light, GLenum pname, const GLfloat *params)
 {
    glLightfv(light, pname, params);
+
+   if (!redraw) return;
 
    switch (pname)
    {
@@ -1244,14 +1280,11 @@ void init ()
 **********************************************************/
 void display ( void )   // Create The Display Function
 {
-   if (redraw)
-   {
-      draw();  
-      redraw = false;
-   }
+   draw();  
    mydraw();
    glFlush();
 	glutSwapBuffers();
+   redraw = false;
 	return;
 }
 
