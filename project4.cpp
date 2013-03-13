@@ -17,8 +17,8 @@ Point setLinePixel(Point one, Point two, double cX, double cY)
                                        
    vector4 theColor = interpolateColor(one.color, two.color, fraction);
    double  cZ       = interpolateZ(one, two, fraction);
-   vector4 norm     = interpolateNormal(one, two, fraction);
-   vector4 light    = interpolateLight(one, two, fraction);
+   vector4 norm     = one.normal;//interpolateNormal(one, two, fraction);
+   vector4 light    = one.light;//interpolateLight(one, two, fraction);
 
    Point pixel(cX, cY, cZ, 0, theColor, norm, light);
    
@@ -156,24 +156,29 @@ vector4 elementTimes(const vector4 &one, const vector4& two)
       );
 }
 
+//**********************************************************
 vector4 addMe(.2, .2, .2, 0);
+/**********************************************************
+This function will calculate return what a color looks like
+under a given light.
+**********************************************************/
+vector4 calcNewColor(const vector4& color, const vector4& light)
+{
+   if (color_test && material_test)
+      return elementTimes(light, color);
+   else if (color_test)
+      return elementTimes(light, vector4(.8, .8, .8, 1)) + addMe;
+   else
+      return color;   
+}
+
 /**********************************************************
 This function will generate the color of a pixel based on
 light and texture.
 **********************************************************/
 vector4 genPixColor(const Point &pixel)
 {
-   if (color_test && material_test){
-      vector4 a(pixel.x, pixel.y, pixel.z, pixel.w);
-      vector4 norm = pixel.normal;
-
-      return elementTimes(pixel.light/*genLightOnVertex(a, norm)*/, 
-                          pixel.color);
-   }
-   else if (color_test)
-      return elementTimes(pixel.light, vector4(.8, .8, .8, 1)) + addMe;
-   else
-      return pixel.color;
+   return calcNewColor(pixel.light, pixel.color);
 }
 
 /**********************************************************
@@ -194,11 +199,11 @@ void setPixel(const Point& pixel)
    int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
    
    //Generate pixel color
-   vector4 color = genPixColor(pixel);
+   //vector4 color = genPixColor(pixel);
    
-   raster[ temp + 0 ] = color[0];
-   raster[ temp + 1 ] = color[1];
-   raster[ temp + 2 ] = color[2];
+   raster[ temp + 0 ] = pixel.color[0];
+   raster[ temp + 1 ] = pixel.color[1];
+   raster[ temp + 2 ] = pixel.color[2];
 
    if (depth_test)
       zBuffer[pixel.x][pixel.y]  = pixel.z;
@@ -605,7 +610,7 @@ vector4 genLightOnVertex(vector4 &p, vector4 &n)
                + max(0.0, cml::dot(n, (lights[i].position - p).normalize())) 
                * lights[i].deffuseColor;
 
-   return light;
+   return light + addMe;
 }
 
 /**********************************************************
@@ -632,7 +637,10 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
    v[0] = ((v[0]+1)/2.0) * viewport[2] + viewport[0];
    v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
         
-   drawVertex(Point(round(v[0]), round(v[1]), v[2], v[3], penColor, norm, light));
+   drawVertex(Point(round(v[0]), round(v[1]), v[2], v[3], 
+                                 (gouraud ? calcNewColor(penColor, light) : penColor), 
+                                 norm, 
+                                 light));
    
    return;
 }
@@ -1120,6 +1128,8 @@ void draw()
       case 2:
          //G Shading
       {
+         gouraud = true;
+         
          clm_glMatrixMode(GL_PROJECTION);
          clm_glLoadIdentity();
          clm_glMatrixMode(GL_MODELVIEW);

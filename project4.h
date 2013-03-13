@@ -53,6 +53,7 @@ bool normalize     = false;
 bool depth_test    = false;
 bool color_test    = false;
 bool material_test = false;
+bool gouraud       = false;
 
 //-----------------------------------------------------
 //Matricies Stacks
