@@ -53,6 +53,8 @@ public:
 	void clear() 
 	{init(-1,-1,-1,-1,vector4(0,0,0,0),vector4(0,0,0,0),vector4(0,0,0,0));}
 	
+	vector4 getPoint() {return vector4(x,y,z,w);}
+
 	int    x;
 	int    y;
 	double z;

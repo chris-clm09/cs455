@@ -24,6 +24,7 @@ typedef cml::vector4d    vector4;
 void setPixel(const Point& pixel);
 vector4 getPixelColor(int x, int y);
 void initZBuffer();
+vector4 genLightOnVertex(vector4 &p, vector4 &n);
 
 
 bool redraw = true;

@@ -163,8 +163,13 @@ light and texture.
 **********************************************************/
 vector4 genPixColor(const Point &pixel)
 {
-   if (color_test && material_test)
-      return elementTimes(pixel.light, pixel.color);
+   if (color_test && material_test){
+      vector4 a(pixel.x, pixel.y, pixel.z, pixel.w);
+      vector4 norm = pixel.normal;
+
+      return elementTimes(pixel.light/*genLightOnVertex(a, norm)*/, 
+                          pixel.color);
+   }
    else if (color_test)
       return elementTimes(pixel.light, vector4(.8, .8, .8, 1)) + addMe;
    else
@@ -615,7 +620,7 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
 
    vector4 norm  = inverseTransOfModelView * normal;
    
-   vector4 light = genLightOnVertex(v, normal);
+   vector4 light = genLightOnVertex(v, norm);
 
    //  Projection               
    v = matrixStacks[1].back() * v;
@@ -1155,7 +1160,50 @@ void draw()
       }
          break;   
       case 3:
+      {
+         clm_glMatrixMode(GL_PROJECTION);
+         clm_glLoadIdentity();
+         clm_glMatrixMode(GL_MODELVIEW);
+         clm_glLoadIdentity();
 
+         clm_glEnable(GL_LIGHTING);
+         clm_glEnable(GL_COLOR_MATERIAL);
+         clm_glEnable(GL_LIGHT0);
+         float diffuse_color[4]  = {0.7,0.7,0.7,1};
+         float ambient_color[4]  = {0.1,0.1,0.1,1};
+         float specular_color[4] = {0,1,0,1};
+         float position[4] = {1,0,-10,1};
+         clm_glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_color);
+         clm_glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_color);
+         clm_glLightfv(GL_LIGHT0, GL_SPECULAR, specular_color);
+         clm_glLightfv(GL_LIGHT0, GL_POSITION, position);
+         
+         float specular_surface_color[4] = {0.0, 1.0, 0.9, 1};
+         glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular_surface_color);
+         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+
+         clm_glColor3f(1,0,0);
+         float dp = M_PI/16; // 16 picked arbitrarily; try other numbers too
+         clm_glBegin(GL_TRIANGLES);
+         for(float theta = 0; theta < 2*M_PI; theta+=dp){
+           for(float phi = 0; phi < M_PI; phi+=dp){
+             clm_glNormal3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glVertex3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glNormal3f(cos(theta+dp)*sin(phi), cos(phi), sin(theta+dp)*sin(phi));
+             clm_glVertex3f(cos(theta+dp)*sin(phi), cos(phi), sin(theta+dp)*sin(phi));
+             clm_glNormal3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glVertex3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glNormal3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glVertex3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glNormal3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glVertex3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glNormal3f(cos(theta)*sin(phi+dp), cos(phi+dp), sin(theta)*sin(phi+dp));
+             clm_glVertex3f(cos(theta)*sin(phi+dp), cos(phi+dp), sin(theta)*sin(phi+dp));
+           }
+         }
+         clm_glEnd();
+         clm_glDisable(GL_LIGHTING);
+      }
          break;
       case 4:
 
