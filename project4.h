@@ -25,6 +25,8 @@ void setPixel(const Point& pixel);
 vector4 getPixelColor(int x, int y);
 void initZBuffer();
 
+
+bool redraw = true;
 /**********************************************************
 * // GLOBAL CRAP
 **********************************************************/
@@ -46,6 +48,7 @@ int lineWidth = 1;
 
 int drawMode       = 0;
 int mymode         = 0;
+bool normalize     = false;
 bool depth_test    = false;
 bool color_test    = false;
 bool material_test = false;

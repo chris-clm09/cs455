@@ -15,14 +15,12 @@ Point setLinePixel(Point one, Point two, double cX, double cY)
                                 two.x, two.y, 
                                 cX,    cY);
                                        
-   vector4 theColor = interpolateColor(one.color,
-                                       two.color,
-                                       fraction);
+   vector4 theColor = interpolateColor(one.color, two.color, fraction);
+   double  cZ       = interpolateZ(one, two, fraction);
+   vector4 norm     = interpolateNormal(one, two, fraction);
+   vector4 light    = interpolateLight(one, two, fraction);
 
-   double cZ = interpolateZ(one, two, fraction);
-   
-
-   Point pixel(cX, cY, cZ, 0, theColor);
+   Point pixel(cX, cY, cZ, 0, theColor, norm, light);
    
    setPixel(pixel);      
    
@@ -172,6 +170,9 @@ vector4 genPixColor(const Point &pixel)
       return pixel.color;
 }
 
+vector4 test(0,0,0,1);
+vector4 textz(0,0,0,0);
+
 /**********************************************************
 This function will set the color of a pixel.
 **********************************************************/
@@ -191,11 +192,14 @@ void setPixel(const Point& pixel)
    
    //Generate pixel color
    vector4 color = genPixColor(pixel);
+   
+//   if (pixel.color != test && pixel.light != textz)
+  //  cout << color << "<" << pixel.light << "<" << pixel.color << endl;
 
    raster[ temp + 0 ] = color[0];
    raster[ temp + 1 ] = color[1];
    raster[ temp + 2 ] = color[2];
-   
+
    if (depth_test)
       zBuffer[pixel.x][pixel.y]  = pixel.z;
         
@@ -581,9 +585,9 @@ vector4 genLightOnVertex(vector4 &p, vector4 &n)
 
    for(int i=0; i<8; i++)
       if (lights[i].enabled)
-         light += lights[0].ambientColor 
-               + max(0.0, cml::dot(n, (lights[0].position - p).normalize())) 
-               * lights[0].deffuseColor;
+         light += lights[i].ambientColor 
+               + max(0.0, cml::dot(n, (lights[i].position - p).normalize())) 
+               * lights[i].deffuseColor;
 
    return light;
 }
@@ -599,6 +603,7 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
    v = matrixStacks[0].back() * v;
 
    vector4 norm  = inverseTransOfModelView * normal;
+   
    vector4 light = genLightOnVertex(v, normal);
 
    //  Projection               
@@ -729,10 +734,13 @@ void clm_glEnable(GLenum mask)
       lights[mask - GL_LIGHT0].enabled = true;
 
    //GL_LIGHTING
-   if (mask & GL_LIGHTING) color_test = true;
+   if (mask == GL_LIGHTING) color_test = true;
 
    //GL_COLOR_MATERIAL
-   if (mask & GL_COLOR_MATERIAL) material_test = true;
+   if (mask == GL_COLOR_MATERIAL) material_test = true;
+
+   //Normalize
+   if (mask == GL_NORMALIZE) normalize = true;
 
    return;
 }
@@ -752,10 +760,13 @@ void clm_glDisable(GLenum mask)
       lights[mask - GL_LIGHT0].enabled = false;
 
    //GL_LIGHTING
-   if (mask & GL_LIGHTING) color_test = false;
+   if (mask == GL_LIGHTING) color_test = false;
 
    //GL_COLOR_MATERIAL
-   if (mask & GL_COLOR_MATERIAL) material_test = false;
+   if (mask == GL_COLOR_MATERIAL) material_test = false;
+
+   //Normalize
+   if (mask == GL_NORMALIZE) normalize = false;
 
    return;
 }
@@ -974,21 +985,21 @@ void clm_glLightfv(GLenum light, GLenum pname, const GLfloat *params)
    switch (pname)
    {
       case (GL_DIFFUSE):
-         lights[light - GL_LIGHT0].setDeffuseColor(vector4(
+         lights[light - GL_LIGHT0].deffuseColor = vector4(
                                     params[0], params[1],
-                                    params[2], params[3]));
+                                    params[2], params[3]);
       break;
 
       case (GL_AMBIENT):
-         lights[light - GL_LIGHT0].setAmbientColor(vector4(
+         lights[light - GL_LIGHT0].ambientColor = vector4(
                                     params[0], params[1],
-                                    params[2], params[3]));         
+                                    params[2], params[3]);         
       break;
       
       case (GL_POSITION):
-         lights[light - GL_LIGHT0].setPosition(vector4(
+         lights[light - GL_LIGHT0].position = vector4(
                                     params[0], params[1],
-                                    params[2], params[3]));
+                                    params[2], params[3]);
       break;
       default:
          cout << "Warrning: "
@@ -1233,7 +1244,11 @@ void init ()
 **********************************************************/
 void display ( void )   // Create The Display Function
 {
-   draw();
+   if (redraw)
+   {
+      draw();  
+      redraw = false;
+   }
    mydraw();
    glFlush();
 	glutSwapBuffers();
@@ -1265,11 +1280,11 @@ void keyboard ( unsigned char key, int x, int y )
 			exit ( 0 );  // Exit The Program
 			break;
 		case 49:
-		   mymode = 1;
+         mymode = 1;
 		   display();
 		   break;
 		case 50:
-		   mymode = 2;
+         mymode = 2;
 		   display();
 		   break;
 		default:
@@ -1286,10 +1301,12 @@ void arrow_keys ( int a_keys, int x, int y )
   switch ( a_keys ) {
     case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
       drawMode = (drawMode+1)%13;
+      redraw = true;
       display();
       break;
     case GLUT_KEY_DOWN:               // When Down Arrow Is Pressed...
       if ((drawMode=drawMode-1) < 0)drawMode=12;
+      redraw = true;
       display();
       break;
     default:

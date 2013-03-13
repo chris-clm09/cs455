@@ -44,13 +44,28 @@ vector4 interpolateLight(Point one, Point two, double fraction)
    vector4 oLight = one.light;
    vector4 tLight = two.light;
 
-   vector4 polated(
-      tLight[0] - oLight[0] * fraction + oLight[0],
-      tLight[1] - oLight[1] * fraction + oLight[1],
-      tLight[2] - oLight[2] * fraction + oLight[2],
-      tLight[3] - oLight[3] * fraction + oLight[3]
-      );
-   return polated;
+   return vector4(
+      (tLight[0] - oLight[0]) * fraction + oLight[0],
+      (tLight[1] - oLight[1]) * fraction + oLight[1],
+      (tLight[2] - oLight[2]) * fraction + oLight[2],
+      (tLight[3] - oLight[3]) * fraction + oLight[3]
+      );;
+}
+
+/**********************************************************
+* This funciton will interpolate normals.
+**********************************************************/
+vector4 interpolateNormal(Point one, Point two, double fraction)
+{
+   vector4 oNorm = one.normal;
+   vector4 tNorm = two.normal;
+
+   return vector4(
+      (tNorm[0] - oNorm[0]) * fraction + oNorm[0],
+      (tNorm[1] - oNorm[1]) * fraction + oNorm[1],
+      (tNorm[2] - oNorm[2]) * fraction + oNorm[2],
+      (tNorm[3] - oNorm[3]) * fraction + oNorm[3]
+      );;
 }
 
 /**********************************************************
