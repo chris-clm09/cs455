@@ -70,6 +70,11 @@ matrix4 identityMatrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 //Lights (Ligth0 == 16384)
 Light lights[8];
 
+//-----------------------------------------------------
+//Shine Stuff
+double materialShine = 0;
+vector4 materialShineColor(0,0,0,0);
+
 
 //-------------------PRINT CRAP--------------------------------------
 void pp(vector4 p){ cout << p[0] << "," << p[1] << "," << p[2] << endl;}

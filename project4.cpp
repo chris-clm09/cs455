@@ -1075,9 +1075,10 @@ void clm_glMaterialf(GLenum face, GLenum pname, GLfloat param)
 {
    glMaterialf(face,pname,param);
 
-   if (!redraw) return;
+   if (!redraw || param > 128 || param < 0) return;
 
-
+   if (face == GL_FRONT_AND_BACK && pname == GL_SHININESS)
+      materialShine = param;
 
    return;
 }
@@ -1091,10 +1092,16 @@ void clm_glMaterialfv( GLenum face, GLenum pname, const GLfloat *params)
 
    if (!redraw) return;
 
-
+   if (face == GL_FRONT_AND_BACK && pname == GL_SPECULAR)
+      materialShineColor.set(params[0], params[1], params[2], params[3]);
 
    return;
 }
+
+
+
+
+
 
 
 
