@@ -9,10 +9,11 @@ public:
    * Constructor
    **********************************************************/
    Light(vector4 deffuseColor, vector4 ambientColor,
-         vector4 position, bool enabled)
+         vector4 position, vector4 shine, bool enabled)
    : deffuseColor(deffuseColor),
      ambientColor(ambientColor),
      position(position),
+     shine(shine),
      enabled(enabled)
    {
       return;
@@ -22,7 +23,7 @@ public:
    * Default Constructor
    **********************************************************/
    Light(): deffuseColor(1,1,1,1), ambientColor(0,0,0,1),
-     position(0,0,1,0), enabled(false)
+     position(0,0,1,0), shine(0,0,0,0), enabled(false)
    {
       return;
    }
@@ -36,5 +37,6 @@ public:
    vector4 deffuseColor;
    vector4 ambientColor;
    vector4 position;
+   vector4 shine;
    bool enabled;
 };

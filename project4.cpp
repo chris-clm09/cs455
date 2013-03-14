@@ -1050,6 +1050,13 @@ void clm_glLightfv(GLenum light, GLenum pname, const GLfloat *params)
                                     params[0], params[1],
                                     params[2], params[3]);
       break;
+
+      case (GL_SPECULAR):
+         lights[light - GL_LIGHT0].shine = vector4(
+                                    params[0], params[1],
+                                    params[2], params[3]);
+      break;
+
       default:
          cout << "Warrning: "
               << "I Don't know how to perform this light operation.\n";
@@ -1058,9 +1065,36 @@ void clm_glLightfv(GLenum light, GLenum pname, const GLfloat *params)
    return;
 }
 
+/**********************************************************
+* This function will specifiy the shininess of a material 
+* as a number between 0 and 128; larger number give 
+* smaller, crisper shine spot, while smaller numbers five 
+* larger, fuzzier shines.
+**********************************************************/
+void clm_glMaterialf(GLenum face, GLenum pname, GLfloat param)
+{
+   glMaterialf(face,pname,param);
+
+   if (!redraw) return;
 
 
 
+   return;
+}
+
+/**********************************************************
+* Specifies the shine color of an object.
+**********************************************************/
+void clm_glMaterialfv( GLenum face, GLenum pname, const GLfloat *params)
+{
+   glMaterialfv(face,pname,params);  
+
+   if (!redraw) return;
+
+
+
+   return;
+}
 
 
 
@@ -1129,7 +1163,7 @@ void draw()
          //G Shading
       {
          gouraud = true;
-         
+
          clm_glMatrixMode(GL_PROJECTION);
          clm_glLoadIdentity();
          clm_glMatrixMode(GL_MODELVIEW);
@@ -1167,6 +1201,8 @@ void draw()
          }
          clm_glEnd();
          clm_glDisable(GL_LIGHTING);
+
+         gouraud = false;
       }
          break;   
       case 3:
@@ -1189,8 +1225,8 @@ void draw()
          clm_glLightfv(GL_LIGHT0, GL_POSITION, position);
          
          float specular_surface_color[4] = {0.0, 1.0, 0.9, 1};
-         glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular_surface_color);
-         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+         clm_glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular_surface_color);
+         clm_glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
 
          clm_glColor3f(1,0,0);
          float dp = M_PI/16; // 16 picked arbitrarily; try other numbers too
