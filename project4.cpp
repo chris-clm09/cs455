@@ -614,6 +614,28 @@ vector4 genLightOnVertex(vector4 &p, vector4 &n)
 }
 
 /**********************************************************
+* Generates the Specular light for a given point.
+**********************************************************/
+vector4 genSpecularOnVertex(vector4& p, vector4& n, double shininess)
+{
+   vector4 specColor(0,0,0,0);
+
+   for(int i=0; i<8; i++)
+      if (lights[i].enabled)
+         if (cml::dot(n, (lights[i].position - p).normalize()) > 0)
+         {
+            vector4 halfway = ((lights[i].position - p).normalize() + 
+                                vector4(0,0,1,0)
+                              ).normalize();
+            
+            specColor += max(0.0, pow(cml::dot(n, halfway), shininess))
+                       * elementTimes(materialShineColor, lights[i].shine);
+         }   
+
+   return specColor;
+}
+
+/**********************************************************
 * Specifies a four vector point.
 **********************************************************/
 void clm4f(double x, double y, double z=0.0, double w=1.0)
