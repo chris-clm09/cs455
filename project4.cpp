@@ -647,7 +647,12 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
 
    vector4 norm  = inverseTransOfModelView * normal;
    
+   if (normalize)
+      norm = norm.normalize();
+  
    vector4 light = genLightOnVertex(v, norm);
+
+   vector4 shine = genSpecularOnVertex(v, norm, materialShine);
 
    //  Projection               
    v = matrixStacks[1].back() * v;
@@ -660,7 +665,7 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
    v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
         
    drawVertex(Point(round(v[0]), round(v[1]), v[2], v[3], 
-                                 (gouraud ? calcNewColor(penColor, light) : penColor), 
+                                 calcNewColor(penColor, light) + shine, 
                                  norm, 
                                  light));
    
@@ -1191,8 +1196,6 @@ void draw()
       case 2:
          //G Shading
       {
-         gouraud = true;
-
          clm_glMatrixMode(GL_PROJECTION);
          clm_glLoadIdentity();
          clm_glMatrixMode(GL_MODELVIEW);
@@ -1230,8 +1233,6 @@ void draw()
          }
          clm_glEnd();
          clm_glDisable(GL_LIGHTING);
-
-         gouraud = false;
       }
          break;   
       case 3:
@@ -1281,7 +1282,40 @@ void draw()
       }
          break;
       case 4:
+      {
+         clm_glEnable(GL_NORMALIZE);
+         clm_glEnable(GL_LIGHTING);
+         clm_glEnable(GL_COLOR_MATERIAL);
+         clm_glEnable(GL_LIGHT0);
+         float diffuse_color[4] = {1.0,1.0,1.0,1};
+         float ambient_color[4] = {0.1,0.1,0.1,1};
+         float position[4] = {0,3,-10,1};
+         clm_glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_color);
+         clm_glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_color);
+         clm_glLightfv(GL_LIGHT0, GL_POSITION, position);
 
+         clm_glColor3f(1,0,0);
+         float dp = M_PI/16; // 16 picked arbitrarily; try other numbers too
+         clm_glBegin(GL_TRIANGLES);
+         for(float theta = 0; theta < 2*M_PI; theta+=dp){
+           for(float phi = 0; phi < M_PI; phi+=dp){
+             clm_glNormal3f(4*cos(theta)*sin(phi), 4*cos(phi), 4*sin(theta)*sin(phi));
+             clm_glVertex3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glNormal3f(4*cos(theta+dp)*sin(phi), 4*cos(phi), 4*sin(theta+dp)*sin(phi));
+             clm_glVertex3f(cos(theta+dp)*sin(phi), cos(phi), sin(theta+dp)*sin(phi));
+             clm_glNormal3f(4*cos(theta+dp)*sin(phi+dp), 4*cos(phi+dp), 4*sin(theta+dp)*sin(phi+dp));
+             clm_glVertex3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glNormal3f(4*cos(theta)*sin(phi), 4*cos(phi), 4*sin(theta)*sin(phi));
+             clm_glVertex3f(cos(theta)*sin(phi), cos(phi), sin(theta)*sin(phi));
+             clm_glNormal3f(4*cos(theta+dp)*sin(phi+dp), 4*cos(phi+dp), 4*sin(theta+dp)*sin(phi+dp));
+             clm_glVertex3f(cos(theta+dp)*sin(phi+dp), cos(phi+dp), sin(theta+dp)*sin(phi+dp));
+             clm_glNormal3f(4*cos(theta)*sin(phi+dp), 4*cos(phi+dp), 4*sin(theta)*sin(phi+dp));
+             clm_glVertex3f(cos(theta)*sin(phi+dp), cos(phi+dp), sin(theta)*sin(phi+dp));
+           }
+         }
+         clm_glEnd();
+         clm_glDisable(GL_LIGHTING);
+      }
          break;
       case 5:
 
