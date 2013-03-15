@@ -21,10 +21,11 @@ typedef cml::vector4d    vector4;
 #include "light.cpp"
 
 //---------------------Forward Declarations----------------
-void setPixel(const Point& pixel);
+void setPixel(Point& pixel);
 vector4 getPixelColor(int x, int y);
 void initZBuffer();
 vector4 genLightOnVertex(vector4 &p, vector4 &n);
+vector4 genSpecularOnVertex(vector4& p, vector4& n, double shininess);
 
 
 bool redraw = true;
@@ -44,7 +45,11 @@ float raster[RASTER_SIZE];
 double zBuffer[SCREEN_WIDTH][SCREEN_HEIGHT];
 GLenum glDrawMode;
 vector<Point> savedPoints;
-Point firstPt(-1,-1, -1, -1, vector4(-1,-1,-1,-1));
+Point firstPt(-1,-1, -1, -1, vector4(-1,-1,-1,-1),
+	vector4(-1,-1,-1,-1),
+	vector4(-1,-1,-1,-1),
+	vector4(-1,-1,-1,-1),
+	0);
 int lineWidth = 1;
 
 int drawMode       = 0;

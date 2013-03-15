@@ -36,36 +36,38 @@ double interpolateZ(Point one, Point two, float fraction)
    return (two.z - one.z)*fraction + one.z;
 }
 
-/**********************************************************
-* This function will return the interpolated the z value.
-**********************************************************/
-vector4 interpolateLight(Point one, Point two, double fraction)
+vector4 terp(vector4& o, vector4& t, double& fraction)
 {
-   vector4 oLight = one.light;
-   vector4 tLight = two.light;
-
    return vector4(
-      (tLight[0] - oLight[0]) * fraction + oLight[0],
-      (tLight[1] - oLight[1]) * fraction + oLight[1],
-      (tLight[2] - oLight[2]) * fraction + oLight[2],
-      (tLight[3] - oLight[3]) * fraction + oLight[3]
-      );;
+      (t[0] - o[0]) * fraction + o[0],
+      (t[1] - o[1]) * fraction + o[1],
+      (t[2] - o[2]) * fraction + o[2],
+      (t[3] - o[3]) * fraction + o[3]
+      );   
 }
+
+vector4 interpolateMv(Point& one, Point& two, double fraction)
+{
+   return terp(one.worldCoordinates, two.worldCoordinates, fraction);
+}
+
+vector4 interpolateSpec(Point& one, Point& two, double fraction)
+{
+   return terp(one.specular, two.specular, fraction);
+}
+
+double interpolateShine(Point& one, Point& two, double fraction)
+{
+   return (two.shininess - one.shininess)*fraction + one.shininess;
+}
+
 
 /**********************************************************
 * This funciton will interpolate normals.
 **********************************************************/
 vector4 interpolateNormal(Point one, Point two, double fraction)
 {
-   vector4 oNorm = one.normal;
-   vector4 tNorm = two.normal;
-
-   return vector4(
-      (tNorm[0] - oNorm[0]) * fraction + oNorm[0],
-      (tNorm[1] - oNorm[1]) * fraction + oNorm[1],
-      (tNorm[2] - oNorm[2]) * fraction + oNorm[2],
-      (tNorm[3] - oNorm[3]) * fraction + oNorm[3]
-      );;
+   return terp(one.normal, two.normal, fraction);
 }
 
 /**********************************************************

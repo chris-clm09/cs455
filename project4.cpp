@@ -15,12 +15,14 @@ Point setLinePixel(Point one, Point two, double cX, double cY)
                                 two.x, two.y, 
                                 cX,    cY);
                                        
-   vector4 theColor = interpolateColor(one.color, two.color, fraction);
    double  cZ       = interpolateZ(one, two, fraction);
-   vector4 norm     = one.normal;//interpolateNormal(one, two, fraction);
-   vector4 light    = one.light;//interpolateLight(one, two, fraction);
+   vector4 theColor = interpolateColor(one.color, two.color, fraction);
+   vector4 norm     = interpolateNormal(one, two, fraction);
+   vector4 mv       = interpolateMv(one, two, fraction);
+   vector4 spec     = interpolateSpec(one, two, fraction);
+   double shininess = interpolateShine(one, two, fraction);
 
-   Point pixel(cX, cY, cZ, 0, theColor, norm, light);
+   Point pixel(cX, cY, cZ, 0, theColor, norm, mv, spec, shininess);
    
    setPixel(pixel);      
    
@@ -162,7 +164,7 @@ vector4 addMe(.2, .2, .2, 0);
 This function will calculate return what a color looks like
 under a given light.
 **********************************************************/
-vector4 calcNewColor(const vector4& color, const vector4& light)
+vector4 calcNewColor(vector4& color, vector4& light)
 {
    if (color_test && material_test)
       return elementTimes(light, color);
@@ -173,18 +175,9 @@ vector4 calcNewColor(const vector4& color, const vector4& light)
 }
 
 /**********************************************************
-This function will generate the color of a pixel based on
-light and texture.
-**********************************************************/
-vector4 genPixColor(const Point &pixel)
-{
-   return calcNewColor(pixel.light, pixel.color);
-}
-
-/**********************************************************
 This function will set the color of a pixel.
 **********************************************************/
-void setPixel(const Point& pixel)
+void setPixel(Point& pixel)
 { 
    //Check if point is in screen and viewport   
    if (pixel.x >= SCREEN_WIDTH || pixel.y >= SCREEN_HEIGHT 
@@ -199,11 +192,17 @@ void setPixel(const Point& pixel)
    int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
    
    //Generate pixel color
-   //vector4 color = genPixColor(pixel);
-   
-   raster[ temp + 0 ] = pixel.color[0];
-   raster[ temp + 1 ] = pixel.color[1];
-   raster[ temp + 2 ] = pixel.color[2];
+   vector4 nNorm = cml::normalize(pixel.normal);
+   vector4 light = genLightOnVertex(pixel.worldCoordinates, 
+                                    nNorm);
+   vector4 specColor = genSpecularOnVertex(pixel.worldCoordinates, 
+                                       nNorm, 
+                                       pixel.shininess);
+   vector4 color = calcNewColor(pixel.color, light) + specColor;
+
+   raster[ temp + 0 ] = color[0];
+   raster[ temp + 1 ] = color[1];
+   raster[ temp + 2 ] = color[2];
 
    if (depth_test)
       zBuffer[pixel.x][pixel.y]  = pixel.z;
@@ -235,7 +234,11 @@ void fillRasterWColor(vector4 color, int x_start = 0, int x_max = SCREEN_WIDTH
    
    for (int x = x_start; x < x_max; x++)
       for (int y = y_start; y < y_max; y++)
-         setPixel(Point(x, y, 0, 1, color));
+      {
+         Point a(x, y, 0, 1, color, vector4(1,1,1,1), vector4(0,0,0,0), vector4(0,0,0,0), 0);
+         setPixel(a);   
+      }
+         
          
    depth_test = oldTest;      
    return;
@@ -354,7 +357,7 @@ void drawVertex(Point p)
    //the first and last calls to glVertex2i when glEnd is called.
    else if (glDrawMode == GL_LINE_LOOP)
    {
-      if (firstPt.eq(Point(-1,-1,-1,-1)))
+      if (firstPt.eq(Point(-1,-1,-1,-1,vector4(0,0,0,0), vector4(1,1,1,1), vector4(0,0,0,0), vector4(0,0,0,0), 0)))
          firstPt = p;
       drawStrip(p);
    }
@@ -645,14 +648,9 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
    //ModelView
    v = matrixStacks[0].back() * v;
 
-   vector4 norm  = inverseTransOfModelView * normal;
-   
-   if (normalize)
-      norm = norm.normalize();
-  
-   vector4 light = genLightOnVertex(v, norm);
+   vector4 md = v;
 
-   vector4 shine = genSpecularOnVertex(v, norm, materialShine);
+   vector4 norm  = inverseTransOfModelView * normal;
 
    //  Projection               
    v = matrixStacks[1].back() * v;
@@ -665,9 +663,11 @@ void clm4f(double x, double y, double z=0.0, double w=1.0)
    v[1] = ((v[1]+1)/2.0) * viewport[3] + viewport[1];
         
    drawVertex(Point(round(v[0]), round(v[1]), v[2], v[3], 
-                                 calcNewColor(penColor, light) + shine, 
-                                 norm, 
-                                 light));
+                     penColor,
+                     norm,
+                     md,
+                     materialShineColor,
+                     materialShine));
    
    return;
 }
@@ -1144,56 +1144,6 @@ void draw()
    switch (drawMode)
    {
       case 0:
-         //Fulstrum
-         clm_glMatrixMode(GL_PROJECTION);
-         clm_glLoadIdentity();
-         clm_glFrustum(-0.1,0.1, -0.1*480/640.0,0.1*480/640.0, 0.1,10);
-         clm_glMatrixMode(GL_MODELVIEW);
-         clm_glLoadIdentity();
-
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0,0,1);
-           clm_glVertex3f(-0.4,-0.6,-1);
-           clm_glVertex3f(0.4,-0.6,-1);
-           clm_glVertex3f(0.4,-0.1,-1);
-           clm_glVertex3f(0.4,-0.1,-1);
-           clm_glVertex3f(-0.4,-0.1,-1);
-           clm_glVertex3f(-0.4,-0.6,-1);
-           clm_glColor3f(1,0,1);
-           clm_glVertex3f(-0.4,-0.1,-1);
-           clm_glVertex3f(0.4,-0.1,-1);
-           clm_glVertex3f(0.3,0,-2);
-           clm_glVertex3f(0.3,0,-2);
-           clm_glVertex3f(-0.3,0,-2);
-           clm_glVertex3f(-0.4,-0.1,-1);
-         clm_glEnd();	
-         break;
-      case 1: 
-         //Perspective
-         clm_glMatrixMode(GL_PROJECTION);
-         clm_glLoadIdentity();
-         clm_gluPerspective(90, double(640)/480.0, .1, 10);
-         clm_glMatrixMode(GL_MODELVIEW);
-         clm_glLoadIdentity();
-
-         clm_glBegin(GL_TRIANGLES);
-           clm_glColor3f(0,0,1);
-           clm_glVertex3f(-0.4,-0.6,-1);
-           clm_glVertex3f(0.4,-0.6,-1);
-           clm_glVertex3f(0.4,-0.1,-1);
-           clm_glVertex3f(0.4,-0.1,-1);
-           clm_glVertex3f(-0.4,-0.1,-1);
-           clm_glVertex3f(-0.4,-0.6,-1);
-           clm_glColor3f(1,0,1);
-           clm_glVertex3f(-0.4,-0.1,-1);
-           clm_glVertex3f(0.4,-0.1,-1);
-           clm_glVertex3f(0.3,0,-2);
-           clm_glVertex3f(0.3,0,-2);
-           clm_glVertex3f(-0.3,0,-2);
-           clm_glVertex3f(-0.4,-0.1,-1);
-         clm_glEnd();
-         break;
-      case 2:
          //G Shading
       {
          clm_glMatrixMode(GL_PROJECTION);
@@ -1235,7 +1185,7 @@ void draw()
          clm_glDisable(GL_LIGHTING);
       }
          break;   
-      case 3:
+      case 1:
       {
          clm_glMatrixMode(GL_PROJECTION);
          clm_glLoadIdentity();
@@ -1281,7 +1231,7 @@ void draw()
          clm_glDisable(GL_LIGHTING);
       }
          break;
-      case 4:
+      case 2:
       {
          clm_glEnable(GL_NORMALIZE);
          clm_glEnable(GL_LIGHTING);
@@ -1317,30 +1267,6 @@ void draw()
          clm_glDisable(GL_LIGHTING);
       }
          break;
-      case 5:
-
-         break;
-      case 6:
-         //
-         break;
-      case 7:
-         //
-         break;
-      case 8:
-         //
-         break;
-      case 9:
-         //
-         break;   
-      case 10:
-      //
-         break;
-      case 11:
-      //
-         break;
-      case 12:
-          //
-      break;
       default:
          cout << "Unknown drawMode! I'm bailing!" << endl;
          exit(0);
