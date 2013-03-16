@@ -17,6 +17,7 @@ public:
 		this->normal   = norm;
 		this->specular = spec;
 		this->worldCoordinates = world;
+		this->shininess = shininess;
    }
 	
 	Point(int x, int y, double z, double w, 

@@ -195,9 +195,12 @@ void setPixel(Point& pixel)
    vector4 nNorm = cml::normalize(pixel.normal);
    vector4 light = genLightOnVertex(pixel.worldCoordinates, 
                                     nNorm);
-   vector4 specColor = genSpecularOnVertex(pixel.worldCoordinates, 
+
+   vector4 specColor = genSpecularOnVertex(
+                                       pixel.worldCoordinates, 
                                        nNorm, 
                                        pixel.shininess);
+
    vector4 color = calcNewColor(pixel.color, light) + specColor;
 
    raster[ temp + 0 ] = color[0];
@@ -1184,7 +1187,7 @@ void draw()
          clm_glEnd();
          clm_glDisable(GL_LIGHTING);
       }
-         break;   
+         break; 
       case 1:
       {
          clm_glMatrixMode(GL_PROJECTION);
@@ -1239,10 +1242,13 @@ void draw()
          clm_glEnable(GL_LIGHT0);
          float diffuse_color[4] = {1.0,1.0,1.0,1};
          float ambient_color[4] = {0.1,0.1,0.1,1};
-         float position[4] = {0,3,-10,1};
+         float position[4] = {1,1,-10,1};
          clm_glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_color);
          clm_glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_color);
          clm_glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+         float specular_surface_color[4] = {1.0, 1.0, 1.0, 1};
+         clm_glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular_surface_color);
 
          clm_glColor3f(1,0,0);
          float dp = M_PI/16; // 16 picked arbitrarily; try other numbers too

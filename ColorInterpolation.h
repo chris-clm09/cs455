@@ -53,12 +53,18 @@ vector4 interpolateMv(Point& one, Point& two, double fraction)
 
 vector4 interpolateSpec(Point& one, Point& two, double fraction)
 {
-   return terp(one.specular, two.specular, fraction);
+   if (one.specular != two.specular)
+      return terp(one.specular, two.specular, fraction);
+   else
+      return one.specular;
 }
 
 double interpolateShine(Point& one, Point& two, double fraction)
 {
-   return (two.shininess - one.shininess)*fraction + one.shininess;
+   if (one.shininess != two.shininess)
+      return (two.shininess - one.shininess)*fraction + one.shininess;
+   else
+      return one.shininess;
 }
 
 
