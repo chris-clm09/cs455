@@ -49,27 +49,26 @@ void display ( void )   // Create The Display Function
    // is red, the screen turns red);
    glClear(GL_COLOR_BUFFER_BIT);
 
-   if (drawMode == 2) {
-      // Save the old state so that you can set it back after you draw
-      GLint oldmatrixmode;
-      GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
-      glDisable(GL_DEPTH_TEST);
-      glGetIntegerv(GL_MATRIX_MODE,&oldmatrixmode);
-      glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
-      glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
-      
-      // Draw the array of pixels (This is where you draw the values
-      // you have stored in the array 'raster')
-      glRasterPos2f(-1,-1);
-      glDrawPixels(SCREEN_HEIGHT,SCREEN_WIDTH,GL_RGB,GL_FLOAT,raster);
-      
-      //Set the state back to what it was
-      glPopMatrix();
-      glMatrixMode(GL_MODELVIEW); glPopMatrix();
-      glMatrixMode(oldmatrixmode);
-      if (depthWasEnabled)
-        glEnable(GL_DEPTH_TEST);
-   }
+    // Save the old state so that you can set it back after you draw
+    GLint oldmatrixmode;
+    GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glGetIntegerv(GL_MATRIX_MODE,&oldmatrixmode);
+    glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
+    glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
+    
+    // Draw the array of pixels (This is where you draw the values
+    // you have stored in the array 'raster')
+    glRasterPos2f(-1,-1);
+    glDrawPixels(SCREEN_HEIGHT,SCREEN_WIDTH,GL_RGB,GL_FLOAT,raster);
+    
+    //Set the state back to what it was
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW); glPopMatrix();
+    glMatrixMode(oldmatrixmode);
+    if (depthWasEnabled)
+      glEnable(GL_DEPTH_TEST);
+
    glFlush();
 
 	//If you are using glut, you will need to uncomment the following call:
@@ -99,11 +98,6 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			exit ( 0 );  // Exit The Program
 			break;
 		case 49:
-		   drawMode = 1;
-		   display();
-		   break;
-		case 50:
-		   drawMode = 2;
 		   display();
 		   break;
 		default:
@@ -111,24 +105,6 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 	}
 }
 
-/**********************************************************
-*
-**********************************************************/
-void arrow_keys ( int a_keys, int x, int y )  // Create Special Function (required for arrow keys)
-{
-  switch ( a_keys ) {
-    case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
-      drawMode = (drawMode+1)%5;
-      display();
-      break;
-    case GLUT_KEY_DOWN:               // When Down Arrow Is Pressed...
-      if ((drawMode=drawMode-1) < 0)drawMode=4;
-      display();
-      break;
-    default:
-      break;
-  }
-}
 
 /**********************************************************
 *
@@ -143,7 +119,6 @@ int main ( int argc, char** argv )   // Create Main Function
   glutDisplayFunc(display);  // Matching Earlier Functions To Their Counterparts
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
-  glutSpecialFunc(arrow_keys);
   glutMainLoop();  // Initialize The Main Loop
   return 0;
 }
