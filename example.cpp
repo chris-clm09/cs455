@@ -3,6 +3,13 @@
 #include <unistd.h>
 #include <GL/glut.h>   // The GL Utility Toolkit (Glut) Header
 #include <iostream>
+#include "cml/cml.h"
+#include <vector>
+
+typedef cml::matrix44d_c matrix4;
+typedef cml::vector4d    vector4;
+
+#include "point.h"
 using namespace std;
 
 /**********************************************************
@@ -15,6 +22,26 @@ float raster[RASTER_SIZE];
 int drawMode = 0;
 
 /**********************************************************
+This function will set the color of a pixel.
+**********************************************************/
+void setPixel(const Point& pixel)
+{ 
+   //Check if point is in screen and viewport   
+   if (pixel.x >= SCREEN_WIDTH || pixel.y >= SCREEN_HEIGHT 
+     || pixel.x < 0 || pixel.y < 0)
+     return;
+   
+        
+   int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
+   
+   raster[ temp + 0 ] = pixel.color[0];
+   raster[ temp + 1 ] = pixel.color[1];
+   raster[ temp + 2 ] = pixel.color[2];
+
+   return;
+}
+
+/**********************************************************
 * Initialize the raster. //?Don't know what a raster is.
 **********************************************************/
 void initRaster()
@@ -24,6 +51,31 @@ void initRaster()
       raster[i] = i / fRasterSize;
    return;
 }
+
+
+/**********************************************************
+* This function will draw a simple sphere into world
+* coordinate and then use ray tracing to generate
+* the screen coordinantes.
+**********************************************************/
+void draw0()
+{
+  return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**********************************************************
 *
@@ -98,6 +150,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 			exit ( 0 );  // Exit The Program
 			break;
 		case 49:
+       draw0();
 		   display();
 		   break;
 		default:
