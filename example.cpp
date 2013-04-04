@@ -1,24 +1,13 @@
 #include "example.h"
 
 /**********************************************************
-* // GLOBAL CRAP
-**********************************************************/
-const int SCREEN_HEIGHT = 640;
-const int SCREEN_WIDTH  = 480;
-const int RASTER_SIZE = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
-float raster[RASTER_SIZE];
-int drawMode = 0;
-
-/**********************************************************
 This function will set the color of a pixel.
 **********************************************************/
 void setPixel(const Point& pixel)
 { 
    //Check if point is in screen and viewport   
-   if (pixel.x >= SCREEN_WIDTH || pixel.y >= SCREEN_HEIGHT 
-     || pixel.x < 0 || pixel.y < 0)
+   if (pixel.x >= SCREEN_WIDTH || pixel.y >= SCREEN_HEIGHT || pixel.x < 0 || pixel.y < 0)
      return;
-   
         
    int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
    
@@ -30,23 +19,10 @@ void setPixel(const Point& pixel)
 }
 
 /**********************************************************
-* Initialize the raster. //?Don't know what a raster is.
+* This function will perform ray tracing.  It will fire
+* a ray from the center of each pixel on the screen.
 **********************************************************/
-void initRaster()
-{
-   float fRasterSize = ((float) RASTER_SIZE); 
-   for (int i = 0; i < RASTER_SIZE; i++)
-      raster[i] = i / fRasterSize;
-   return;
-}
-
-
-/**********************************************************
-* This function will draw a simple sphere into world
-* coordinate and then use ray tracing to generate
-* the screen coordinantes.
-**********************************************************/
-void draw0()
+void ray_trace()
 {
   return;
 }
@@ -62,8 +38,45 @@ void draw0()
 
 
 
+/**********************************************************
+* This function will draw a simple sphere into world
+* coordinate and then use ray tracing to generate
+* the screen coordinantes.
+**********************************************************/
+void draw0()
+{
+  //Set up Scene
+  currentScene.clear();
+
+  //Add Objects
+  double s[] = {500,500,100,0};
+  Sphere a(s, 20);
+  currentScene.addObj(a);  
+
+  //Added a Light
+  currentScene.setCamera(Camera({500,500,0,0},{0,0,1,0}));
+
+  //Set Camera
 
 
+  //Ray_Trace
+  ray_trace();
+  
+  return;
+}
+
+
+
+/**********************************************************
+* Initialize the raster. //?Don't know what a raster is.
+**********************************************************/
+void initRaster()
+{
+   float fRasterSize = ((float) RASTER_SIZE); 
+   for (int i = 0; i < RASTER_SIZE; i++)
+      raster[i] = i / fRasterSize;
+   return;
+}
 
 /**********************************************************
 *
