@@ -22,17 +22,93 @@ void setPixel(int x, int y, const vector4 & color)
    return;
 }
 
+
+/**********************************************************
+* Returns the index of the closest object that was hit by
+* the given ray.
+**********************************************************/
+inline int getIndexOfClosestHit(const Ray& r, double &d)
+{
+  int indexHitSphere = -1;
+  d = 20000.0;
+
+  for (int i = 0; i < currentScene.sceneObjects.size(); i++)
+    if (currentScene.sceneObjects[i].rayHitMeCloserThanD(r, d))
+      indexHitSphere = i;
+
+  return indexHitSphere;
+}
+
+
+inline vector4 calHitPoint(const Ray& r, const double & d)
+{
+  return r.pos + d * r.dir;
+}
+
+inline bool inShadow(const Ray& lightRay, double d)
+{
+  for (int i = 0; i < currentScene.sceneObjects.size() ; ++i)
+    if (currentScene.sceneObjects[i].rayHitMeCloserThanD(lightRay, d))
+      return true;
+
+  return false;
+}
+
 /**********************************************************
 * This function will shoot a ray into the scene and 
 * generate the color for that pixel based off of any
 * objects it hits in the scene.
 **********************************************************/
-vector4 shootRay(const Ray& r)
+vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0)
 {
-  vector4 color;
+  if (level > 3) return color;
 
+  //Hit something
+  double d;
+  int indexClosestHitSphere = getIndexOfClosestHit(r, d);
+  if (indexClosestHitSphere == -1) return color;
 
-  return color;
+  //Calc Point Hit
+  vector4 hitPoint = calHitPoint(r, d);
+
+  //Calc Normal at Hit
+  vector4 hitPntNormal = hitPoint - currentScene.sceneObjects[indexClosestHitSphere].pos;
+  hitPntNormal = hitPntNormal.normalize();
+
+  //Validate Closest Hit
+  if (hitPntNormal == vector4(0,0,0,0)) return color;
+
+  //Calc Color
+  Ray lightRay;
+  lightRay.pos = hitPoint;
+  for (int i = 0; i < currentScene.lights.size(); i++)
+  {
+    Light currentLight = currentScene.lights[i];
+
+    lightRay.dir = currentLight.pos - hitPoint;
+    double lightProjection = dot(lightRay.dir, hitPntNormal);
+    if (lightProjection <= 0) continue;
+
+    double lightDist = dot(lightRay.dir,lightRay.dir);
+    {
+      double temp = lightDist;
+      if (temp == 0.0) continue;
+      temp = 1.0 / sqrtf(temp);
+      lightRay.dir = temp * lightRay.dir;
+      lightProjection = temp * lightProjection;
+    }
+
+    if (!inShadow(lightRay, lightDist))
+    {
+
+    }
+
+  }
+
+  //Shoot Next Ray
+  Ray nextRay;
+
+  return shootRay(nextRay, color, level++);
 }
 
 /**********************************************************
@@ -85,11 +161,13 @@ void draw0()
 
   //Add Objects
   double s[] = {500,500,100,0};
-  Sphere a(s, 20, vector4(255,0,0,0));
+  Sphere a(s, 20, vector4(1,0,0,0));
   currentScene.addObj(a);  
 
   //Added a Light
-  currentScene.addLight(Light(vector4(700,500,50,0)));
+  currentScene.addLight(Light(vector4(700,500,50,0),
+                              vector4(1,1,1,1),
+                              vector4(.1,.1,.1,1)));
 
 
   //Set Camera

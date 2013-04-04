@@ -24,10 +24,13 @@ class Light
 {
 public:
 	Light(){};
-	Light(const vector4 &p) : pos(p) {return;}
+	Light(const vector4 &p,const vector4 &a,const vector4 &d) 
+	: pos(p), ambientColor(a), deffuseColor(d) {return;}
 
 //private:
 	vector4 pos;
+	vector4 ambientColor;
+	vector4 deffuseColor;
 };
 
 /************************************************************

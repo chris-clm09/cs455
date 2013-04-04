@@ -10,17 +10,28 @@
 class Sphere
 {
 public:
-	Sphere():radius(0), pos(0,0,0,0), color(255,255,255,0) {return;}
-	Sphere(double p[], double radius, const vector4 &c):pos(p[0],p[1],p[2],p[3]),
-														radius(radius),
-														color(c)
-														{return;}
+	Sphere():radius(0), pos(0,0,0,0), color(1,1,1,0) {return;}
+	
+	Sphere(double p[], 
+			double radius, 
+			const vector4 &c, 
+			const vector4 &sc=vector4(1,1,1,0),
+		   	double shinyness=1, 
+		   	double reflectivity=1)
+	:pos(p[0],p[1],p[2],p[3]),
+	radius(radius),
+	color(c),
+	specColor(sc),
+	shinyness(shinyness),
+	reflectivity(reflectivity)
+	{return;}
+
 
 	/************************************************************
 	* Return true if a ray intersects this sphere. It also
-	* updates t to the distance from the ray to the hit.
+	* updates d to the distance from the ray to the hit.
 	************************************************************/
-	bool rayHitMe(const Ray &r, double &t)
+	bool rayHitMeCloserThanD(const Ray &r, double &d)
 	{
 	 	vector4 dist = pos - r.pos;
 		double B = dot(r.dir,dist);
@@ -32,14 +43,14 @@ public:
 		double t1 = B + sqrtf(D);
 		
 		bool retvalue = false;
-		if ((t0 > 0.1f ) && (t0 < t))
+		if ((t0 > 0.1f ) && (t0 < d))
 		{
-			t = t0;
+			d = t0;
 			retvalue = true;
 		}
-		if ((t1 > 0.1f ) && (t1 < t))
+		if ((t1 > 0.1f ) && (t1 < d))
 		{
-			t = t1;
+			d = t1;
 			retvalue = true;
 		}
 		return retvalue;
@@ -48,6 +59,9 @@ public:
 //private:
 	vector4 pos;
 	vector4 color;
+	vector4 specColor;
+	double reflectivity;
+	double shinyness;
 	double radius;
 };
 
