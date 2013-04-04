@@ -15,9 +15,9 @@ class Scene
 public:
 	Scene(){}
 
-	void addLight(const Light & l) 		{lights.push_back(l);}
-	void addObj(const SceneObject &obj) {sceneObjects.push_back(obj);}
-	void setCamera(const Camera &cam)   {camera = cam;}
+	void addLight(const Light & l) 	   {lights.push_back(l);}
+	void addObj(const Sphere &obj)     {sceneObjects.push_back(obj);}
+	void setCamera(const Camera &cam)  {camera = cam;}
 
 	void clear()
 	{	
@@ -27,7 +27,7 @@ public:
 	}
 //private:
 	vector<Light> lights;
-	vector<SceneObject> sceneObjects;
+	vector<Sphere> sceneObjects;
 	Camera camera;
 };
 

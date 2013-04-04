@@ -54,11 +54,14 @@ void draw0()
   currentScene.addObj(a);  
 
   //Added a Light
-  currentScene.setCamera(Camera({500,500,0,0},{0,0,1,0}));
+  currentScene.addLight(Light(vector4(700,500,50,0)));
+
 
   //Set Camera
-
-
+  double s1[] = {500,500,0,0};
+  double s2[] = {0,0,1,0};
+  currentScene.setCamera(Camera(s1,s2));
+  
   //Ray_Trace
   ray_trace();
   
@@ -74,7 +77,7 @@ void initRaster()
 {
    float fRasterSize = ((float) RASTER_SIZE); 
    for (int i = 0; i < RASTER_SIZE; i++)
-      raster[i] = i / fRasterSize;
+      raster[i] = 0;
    return;
 }
 

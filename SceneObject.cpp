@@ -3,26 +3,14 @@
 
 #include "WorldStuff.cpp"
 
-/************************************************************
-* Represents any scene object.
-************************************************************/
-class SceneObject
-{
-public:
-	SceneObject(){}
-	virtual bool rayHitMe(const Ray &r, double &t){return false;}
-
-private:
-
-};
 
 /************************************************************
 * Represents a sphere in 3d space.
 ************************************************************/
-class Sphere: public SceneObject
+class Sphere
 {
 public:
-	Sphere():SceneObject(), radius(0), pos(0,0,0,0) {return;}
+	Sphere():radius(0), pos(0,0,0,0) {return;}
 	Sphere(double p[], double radius):pos(p[0],p[1],p[2],p[3]),radius(radius){return;}
 
 	/************************************************************
