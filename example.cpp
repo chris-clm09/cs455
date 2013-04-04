@@ -15,9 +15,9 @@ void setPixel(int x, int y, const vector4 & color)
         
    int temp = ((y * SCREEN_WIDTH) + x) * 3;
    
-   raster[ temp + 0 ] = pixel.color[0];
-   raster[ temp + 1 ] = pixel.color[1];
-   raster[ temp + 2 ] = pixel.color[2];
+   raster[ temp + 0 ] = color[0];
+   raster[ temp + 1 ] = color[1];
+   raster[ temp + 2 ] = color[2];
 
    return;
 }
@@ -25,7 +25,13 @@ void setPixel(int x, int y, const vector4 & color)
 /**********************************************************
 * 
 **********************************************************/
+vector4 shootRay(const Ray& r)
+{
+  vector4 color;
 
+
+  return color;
+}
 
 /**********************************************************
 * This function will perform ray tracing.  It will fire
@@ -37,18 +43,18 @@ void ray_trace()
   for (int x = 0; x < SCREEN_WIDTH; x++)
     for (int y = 0; y < SCREEN_HEIGHT; y++)
     {
-      vector4 rayPos(currentScene.camera[0] - SCREEN_WIDTH / 2.0,
-                     currentScene.camera[1] - SCREEN_HEIGHT / 2.0,
-                     currentScene.camera[2] + 1,
+      vector4 rayPos(currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0,
+                     currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0,
+                     currentScene.camera.pos[2] + 1,
                      0);
 
-      vector4 rayDir = (rayPos - currentScene.camera).normalize();
+      vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
 
       Ray r(rayPos, rayDir);
 
       vector4 color = shootRay(r);
 
-      setPixel(rayPos[0],rayPos[1],color);
+      setPixel(x,y,color);
     }
 
   return;
