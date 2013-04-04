@@ -1,15 +1,19 @@
 #include "example.h"
 
+inline bool isOutOfScreen(int x, int y)
+{
+  return (x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT || x < 0 || y < 0);
+}
+
 /**********************************************************
 This function will set the color of a pixel.
 **********************************************************/
-void setPixel(const Point& pixel)
+void setPixel(int x, int y, const vector4 & color)
 { 
    //Check if point is in screen and viewport   
-   if (pixel.x >= SCREEN_WIDTH || pixel.y >= SCREEN_HEIGHT || pixel.x < 0 || pixel.y < 0)
-     return;
+   if (isOutOfScreen(x,y)) return;
         
-   int temp = ((pixel.y * SCREEN_WIDTH) + pixel.x) * 3;
+   int temp = ((y * SCREEN_WIDTH) + x) * 3;
    
    raster[ temp + 0 ] = pixel.color[0];
    raster[ temp + 1 ] = pixel.color[1];
@@ -19,11 +23,34 @@ void setPixel(const Point& pixel)
 }
 
 /**********************************************************
+* 
+**********************************************************/
+
+
+/**********************************************************
 * This function will perform ray tracing.  It will fire
 * a ray from the center of each pixel on the screen.
 **********************************************************/
 void ray_trace()
 {
+  //Walk through Each Point
+  for (int x = 0; x < SCREEN_WIDTH; x++)
+    for (int y = 0; y < SCREEN_HEIGHT; y++)
+    {
+      vector4 rayPos(currentScene.camera[0] - SCREEN_WIDTH / 2.0,
+                     currentScene.camera[1] - SCREEN_HEIGHT / 2.0,
+                     currentScene.camera[2] + 1,
+                     0);
+
+      vector4 rayDir = (rayPos - currentScene.camera).normalize();
+
+      Ray r(rayPos, rayDir);
+
+      vector4 color = shootRay(r);
+
+      setPixel(rayPos[0],rayPos[1],color);
+    }
+
   return;
 }
 
@@ -61,7 +88,7 @@ void draw0()
   double s1[] = {500,500,0,0};
   double s2[] = {0,0,1,0};
   currentScene.setCamera(Camera(s1,s2));
-  
+
   //Ray_Trace
   ray_trace();
   

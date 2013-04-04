@@ -19,7 +19,27 @@ public:
 	************************************************************/
 	bool rayHitMe(const Ray &r, double &t)
 	{
-		return false;
+	 	vector4 dist = pos - r.pos;
+		double B = dot(r.dir,dist);
+		double D = B * B - dot(dist,dist) + radius * radius;
+		
+		if (D < 0.0f) return false;
+		
+		double t0 = B - sqrtf(D);
+		double t1 = B + sqrtf(D);
+		
+		bool retvalue = false;
+		if ((t0 > 0.1f ) && (t0 < t))
+		{
+			t = t0;
+			retvalue = true;
+		}
+		if ((t1 > 0.1f ) && (t1 < t))
+		{
+			t = t1;
+			retvalue = true;
+		}
+		return retvalue;
 	}
 
 //private:
