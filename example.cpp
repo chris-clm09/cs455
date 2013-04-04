@@ -23,7 +23,9 @@ void setPixel(int x, int y, const vector4 & color)
 }
 
 /**********************************************************
-* 
+* This function will shoot a ray into the scene and 
+* generate the color for that pixel based off of any
+* objects it hits in the scene.
 **********************************************************/
 vector4 shootRay(const Ray& r)
 {
@@ -83,7 +85,7 @@ void draw0()
 
   //Add Objects
   double s[] = {500,500,100,0};
-  Sphere a(s, 20);
+  Sphere a(s, 20, vector4(255,0,0,0));
   currentScene.addObj(a);  
 
   //Added a Light

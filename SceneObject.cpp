@@ -10,8 +10,11 @@
 class Sphere
 {
 public:
-	Sphere():radius(0), pos(0,0,0,0) {return;}
-	Sphere(double p[], double radius):pos(p[0],p[1],p[2],p[3]),radius(radius){return;}
+	Sphere():radius(0), pos(0,0,0,0), color(255,255,255,0) {return;}
+	Sphere(double p[], double radius, const vector4 &c):pos(p[0],p[1],p[2],p[3]),
+														radius(radius),
+														color(c)
+														{return;}
 
 	/************************************************************
 	* Return true if a ray intersects this sphere. It also
@@ -44,6 +47,7 @@ public:
 
 //private:
 	vector4 pos;
+	vector4 color;
 	double radius;
 };
 
