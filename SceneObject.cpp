@@ -33,10 +33,12 @@ public:
 	************************************************************/
 	bool rayHitMeCloserThanD(const Ray &r, double &d)
 	{
-	 	vector4 dist = pos - r.pos;
+	 	vector4 dist = r.pos - pos;
 
-		double B = dot(r.dir,dist);
-		double D = B * B - dot(dist,dist) + radius * radius;
+		double B = 2 * dot(r.dir,dist);
+		vector4 s = r.pos + r.dir * d - pos;
+		double C = (dist * dist) - dot(s,s);
+		double D = (B * B )- (4 * C)dot(dist,dist) + radius * radius;
 		
 		if (D < 0.0f) return false;
 		
