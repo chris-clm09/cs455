@@ -3,6 +3,7 @@
 
 #include "WorldStuff.cpp"
 
+
 /************************************************************
 * Represents a sphere in 3d space.
 ************************************************************/
@@ -32,17 +33,15 @@ public:
 	************************************************************/
 	bool rayHitMeCloserThanD(const Ray &r, double &d)
 	{
-	 	vector4 dist = r.pos - pos;
+	 	vector4 dist = pos - r.pos;
 
-		double  B = 2 * dot(r.dir,dist);
-		vector4 s = r.pos + r.dir * d - pos;
-		double  C = dot(dist, dist) - dot(s,s);
-		double  D = (B * B) - (4 * C);
+		double B = dot(r.dir,dist);
+		double D = B * B - dot(dist,dist) + radius * radius;
 		
 		if (D < 0.0f) return false;
 		
-		double t0 = (- B - sqrtf(D)) / 2.0;
-		double t1 = (- B + sqrtf(D)) / 2.0;
+		double t0 = B - sqrtf(D);
+		double t1 = B + sqrtf(D);
 		
 		bool retvalue = false;
 		if ((t0 > 0.1f ) && (t0 < d))
