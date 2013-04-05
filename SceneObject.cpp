@@ -3,7 +3,6 @@
 
 #include "WorldStuff.cpp"
 
-
 /************************************************************
 * Represents a sphere in 3d space.
 ************************************************************/
@@ -35,15 +34,15 @@ public:
 	{
 	 	vector4 dist = r.pos - pos;
 
-		double B = 2 * dot(r.dir,dist);
+		double  B = 2 * dot(r.dir,dist);
 		vector4 s = r.pos + r.dir * d - pos;
-		double C = (dist * dist) - dot(s,s);
-		double D = (B * B )- (4 * C)dot(dist,dist) + radius * radius;
+		double  C = dot(dist, dist) - dot(s,s);
+		double  D = (B * B) - (4 * C);
 		
 		if (D < 0.0f) return false;
 		
-		double t0 = B - sqrtf(D);
-		double t1 = B + sqrtf(D);
+		double t0 = (- B - sqrtf(D)) / 2.0;
+		double t1 = (- B + sqrtf(D)) / 2.0;
 		
 		bool retvalue = false;
 		if ((t0 > 0.1f ) && (t0 < d))
