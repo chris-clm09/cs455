@@ -34,6 +34,7 @@ public:
 	bool rayHitMeCloserThanD(const Ray &r, double &d)
 	{
 	 	vector4 dist = pos - r.pos;
+
 		double B = dot(r.dir,dist);
 		double D = B * B - dot(dist,dist) + radius * radius;
 		

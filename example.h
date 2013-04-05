@@ -8,13 +8,13 @@
 #include <iostream>
 #include "cml/cml.h"
 #include <vector>
+using namespace std;
 
 typedef cml::matrix44d_c matrix4;
 typedef cml::vector4d    vector4;
 
 #include "point.h"
 #include "Scene.cpp"
-using namespace std;
 
 /**********************************************************
 * // GLOBAL CRAP

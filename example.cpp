@@ -19,9 +19,24 @@ void setPixel(int x, int y, const vector4 & color)
    raster[ temp + 1 ] = color[1];
    raster[ temp + 2 ] = color[2];
 
+   //cout << x << " " << y << " " << color << endl;
+
    return;
 }
 
+/**********************************************************
+This function will generate the color of a pixel based on
+light and texture.
+**********************************************************/
+vector4 elementTimes(const vector4 &one, const vector4& two)
+{
+   return vector4(
+      one[0] * two[0],
+      one[1] * two[1],
+      one[2] * two[2],
+      one[3] * two[3]
+      );
+}
 
 /**********************************************************
 * Returns the index of the closest object that was hit by
@@ -33,18 +48,26 @@ inline int getIndexOfClosestHit(const Ray& r, double &d)
   d = 20000.0;
 
   for (int i = 0; i < currentScene.sceneObjects.size(); i++)
+  {
     if (currentScene.sceneObjects[i].rayHitMeCloserThanD(r, d))
+    { 
+      //cout << "Hit Somthing!\n"; 
       indexHitSphere = i;
-
+    }
+  } 
   return indexHitSphere;
 }
 
 
+/**********************************************************
+**********************************************************/
 inline vector4 calHitPoint(const Ray& r, const double & d)
 {
   return r.pos + d * r.dir;
 }
 
+/**********************************************************
+**********************************************************/
 inline bool inShadow(const Ray& lightRay, double d)
 {
   for (int i = 0; i < currentScene.sceneObjects.size() ; ++i)
@@ -59,14 +82,16 @@ inline bool inShadow(const Ray& lightRay, double d)
 * generate the color for that pixel based off of any
 * objects it hits in the scene.
 **********************************************************/
-vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0)
+vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0, double coef=1.0)
 {
+  //cout << "level: " << level << endl;
   if (level > 3) return color;
 
   //Hit something
   double d;
   int indexClosestHitSphere = getIndexOfClosestHit(r, d);
   if (indexClosestHitSphere == -1) return color;
+  else return vector4(255,0,0,0);
 
   //Calc Point Hit
   vector4 hitPoint = calHitPoint(r, d);
@@ -81,6 +106,7 @@ vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0)
   //Calc Color
   Ray lightRay;
   lightRay.pos = hitPoint;
+  vector4 light(0,0,0,0);
   for (int i = 0; i < currentScene.lights.size(); i++)
   {
     Light currentLight = currentScene.lights[i];
@@ -100,13 +126,23 @@ vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0)
 
     if (!inShadow(lightRay, lightDist))
     {
-
+      light += max(0.0, cml::dot(hitPntNormal, lightRay.dir)) *
+               coef * 
+               currentLight.deffuseColor;
     }
 
   }
+  vector4 objColor = elementTimes(currentScene.sceneObjects[indexClosestHitSphere].color,light);
+  color += objColor;
+
+  cout << "objColor: " << objColor << " NewColor: " << color << endl;
 
   //Shoot Next Ray
   Ray nextRay;
+  coef *= currentScene.sceneObjects[indexClosestHitSphere].reflectivity;
+  double reflet = 2.0 * dot(r.dir, hitPntNormal);
+  nextRay.pos = hitPoint;
+  nextRay.dir = r.dir - reflet * hitPntNormal;
 
   return shootRay(nextRay, color, level++);
 }
@@ -121,12 +157,15 @@ void ray_trace()
   for (int x = 0; x < SCREEN_WIDTH; x++)
     for (int y = 0; y < SCREEN_HEIGHT; y++)
     {
-      vector4 rayPos(currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0,
-                     currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0,
+      vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + x,
+                     (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + y,
                      currentScene.camera.pos[2] + 1,
                      0);
 
-      vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
+      //cout << rayPos << endl;
+
+      vector4 rayDir(0,0,1,0);
+      //vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
 
       Ray r(rayPos, rayDir);
 
@@ -160,7 +199,7 @@ void draw0()
   currentScene.clear();
 
   //Add Objects
-  double s[] = {500,500,100,0};
+  double s[] = {500,500,50,0};
   Sphere a(s, 20, vector4(1,0,0,0));
   currentScene.addObj(a);  
 
@@ -178,6 +217,8 @@ void draw0()
   //Ray_Trace
   ray_trace();
   
+  cout << "DONE" << endl;
+
   return;
 }
 
