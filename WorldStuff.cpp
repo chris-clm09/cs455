@@ -24,7 +24,7 @@ class Light
 {
 public:
 	Light(){};
-	Light(const vector4 &p,const vector4 &a,const vector4 &d) 
+	Light(const vector4 &p,const vector4 &d,const vector4 &a) 
 	: pos(p), ambientColor(a), deffuseColor(d) {return;}
 
 //private:

@@ -120,10 +120,8 @@ vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0, doub
                coef * 
                currentLight.deffuseColor;
   }
-  vector4 objColor = elementTimes(currentScene.sceneObjects[indexClosestHitSphere].color, light + vector4(.002,.002,.002,0));
+  vector4 objColor = elementTimes(currentScene.sceneObjects[indexClosestHitSphere].color, light);
   color += objColor;
-
-  //cout << "objColor: " << objColor << " NewColor: " << color << endl;
 
   //Shoot Next Ray
   Ray nextRay;
@@ -168,12 +166,6 @@ void ray_trace()
 
 
 
-
-
-
-
-
-
 /**********************************************************
 * This function will draw a simple sphere into world
 * coordinate and then use ray tracing to generate
@@ -189,7 +181,7 @@ void draw0()
 
   //Add Objects
   double s[] = {500,500,200,0};
-  Sphere a(s, 100, vector4(255,0,0,0));
+  Sphere a(s, 100, vector4(1,0,0,0));
   currentScene.addObj(a);  
 
   //Added a Light
@@ -206,10 +198,64 @@ void draw0()
   //Ray_Trace
   ray_trace();
   
-  cout << "DONE" << endl;
+  cout << "DONE0" << endl;
 
   return;
 }
+
+/**********************************************************
+* This function will draw a simple sphere into world
+* coordinate and then use ray tracing to generate
+* the screen coordinantes.
+**********************************************************/
+void draw1()
+{
+  //Clear the raster
+  initRaster();
+
+  //Set up Scene
+  currentScene.clear();
+
+  double i = 1.5;
+
+  //Add Objects
+  double s[] = {233,290,400,0};
+  Sphere a(s, 100, vector4(i,i,0,0), .5);
+  currentScene.addObj(a);  
+
+  //Add Objects
+  double s1[] = {407,290,400,0};
+  Sphere a1(s1, 100, vector4(0,i,i,0), .5);
+  currentScene.addObj(a1);  
+
+  //Add Objects
+  double s2[] = {320,140,400,0};
+  Sphere a2(s2, 100, vector4(i,0,i,0), .5);
+  currentScene.addObj(a2);  
+
+  //Added a Light
+  currentScene.addLight(Light(vector4(0,240,250,0),
+                              vector4(1,1,1,1),
+                              vector4(.1,.1,.1,1)));
+
+//Added a Light
+  currentScene.addLight(Light(vector4(640,240,0,0),
+                              vector4(.09,.09,.09,0),
+                              vector4(.1,.1,.1,1)));
+
+  //Set Camera
+  double cpos[] = {250,200,0,0};
+  double cdir[] = {0,0,1,0};
+  currentScene.setCamera(Camera(cpos,cdir));
+
+  //Ray_Trace
+  ray_trace();
+  
+  cout << "DONE1" << endl;
+
+  return;
+}
+
 
 
 
@@ -301,6 +347,10 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
        draw0();
 		   display();
 		   break;
+    case 50:
+      draw1();
+      display();
+      break;
 		default:
 			break;
 	}
