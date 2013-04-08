@@ -91,8 +91,7 @@ vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0, doub
   double d;
   int indexClosestHitSphere = getIndexOfClosestHit(r, d);
   if (indexClosestHitSphere == -1) return color;
-  else return vector4(255,0,0,0);
-
+  
   //Calc Point Hit
   vector4 hitPoint = calHitPoint(r, d);
 
@@ -101,41 +100,30 @@ vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0, doub
   hitPntNormal = hitPntNormal.normalize();
 
   //Validate Closest Hit
-  if (hitPntNormal == vector4(0,0,0,0)) return color;
+  if (hitPntNormal == vector4(0,0,0,0)) {cout << "NormZero.\n";return color;}
 
   //Calc Color
   Ray lightRay;
   lightRay.pos = hitPoint;
+
   vector4 light(0,0,0,0);
   for (int i = 0; i < currentScene.lights.size(); i++)
   {
     Light currentLight = currentScene.lights[i];
 
     lightRay.dir = currentLight.pos - hitPoint;
-    double lightProjection = dot(lightRay.dir, hitPntNormal);
-    if (lightProjection <= 0) continue;
-
     double lightDist = dot(lightRay.dir,lightRay.dir);
-    {
-      double temp = lightDist;
-      if (temp == 0.0) continue;
-      temp = 1.0 / sqrtf(temp);
-      lightRay.dir = temp * lightRay.dir;
-      lightProjection = temp * lightProjection;
-    }
-
+    lightRay.dir = lightRay.dir.normalize();
+    
     if (!inShadow(lightRay, lightDist))
-    {
-      light += max(0.0, cml::dot(hitPntNormal, lightRay.dir)) *
+      light += max(0.0, (double)cml::dot(hitPntNormal, lightRay.dir)) *
                coef * 
                currentLight.deffuseColor;
-    }
-
   }
-  vector4 objColor = elementTimes(currentScene.sceneObjects[indexClosestHitSphere].color,light);
+  vector4 objColor = elementTimes(currentScene.sceneObjects[indexClosestHitSphere].color, light + vector4(.002,.002,.002,0));
   color += objColor;
 
-  cout << "objColor: " << objColor << " NewColor: " << color << endl;
+  //cout << "objColor: " << objColor << " NewColor: " << color << endl;
 
   //Shoot Next Ray
   Ray nextRay;
@@ -144,7 +132,7 @@ vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0, doub
   nextRay.pos = hitPoint;
   nextRay.dir = r.dir - reflet * hitPntNormal;
 
-  return shootRay(nextRay, color, level++);
+  return shootRay(nextRay, color, level+1, coef);
 }
 
 /**********************************************************
@@ -159,11 +147,10 @@ void ray_trace()
     {
       vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + x,
                      (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + y,
-                     currentScene.camera.pos[2] + 1,
+                     currentScene.camera.pos[2]  + 1,
                      0);
 
       //cout << rayPos << endl;
-
       vector4 rayDir(0,0,1,0);
       //vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
 
@@ -173,7 +160,6 @@ void ray_trace()
 
       setPixel(x,y,color);
     }
-
   return;
 }
 
@@ -195,16 +181,19 @@ void ray_trace()
 **********************************************************/
 void draw0()
 {
+  //Clear the raster
+  initRaster();
+
   //Set up Scene
   currentScene.clear();
 
   //Add Objects
-  double s[] = {500,500,50,0};
-  Sphere a(s, 20, vector4(1,0,0,0));
+  double s[] = {500,500,200,0};
+  Sphere a(s, 100, vector4(255,0,0,0));
   currentScene.addObj(a);  
 
   //Added a Light
-  currentScene.addLight(Light(vector4(700,500,50,0),
+  currentScene.addLight(Light(vector4(600,400,0,0),
                               vector4(1,1,1,1),
                               vector4(.1,.1,.1,1)));
 
@@ -246,6 +235,7 @@ void init ()
    glEnable(GL_DEPTH_TEST);			// Enables Depth Testing
    glDepthFunc(GL_LEQUAL);				// The Type Of Depth Testing To Do
    glEnable(GL_COLOR_MATERIAL);
+   glEnable(GL_POINT_SMOOTH);
    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 
@@ -254,10 +244,10 @@ void init ()
 **********************************************************/
 void display ( void )   // Create The Display Function
 {
-	 glClearColor(1,0,0,1);  // Set the clear color
+//	 glClearColor(1,0,0,1);  // Set the clear color
    // Clear the screen to the clear color (i.e. if the clear color
    // is red, the screen turns red);
-   glClear(GL_COLOR_BUFFER_BIT);
+ //  glClear(GL_COLOR_BUFFER_BIT);
 
     // Save the old state so that you can set it back after you draw
     GLint oldmatrixmode;
@@ -270,7 +260,7 @@ void display ( void )   // Create The Display Function
     // Draw the array of pixels (This is where you draw the values
     // you have stored in the array 'raster')
     glRasterPos2f(-1,-1);
-    glDrawPixels(SCREEN_HEIGHT,SCREEN_WIDTH,GL_RGB,GL_FLOAT,raster);
+    glDrawPixels(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, GL_FLOAT, raster);
     
     //Set the state back to what it was
     glPopMatrix();
@@ -324,12 +314,14 @@ int main ( int argc, char** argv )   // Create Main Function
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE); // Display Mode
-  glutInitWindowSize(640, 480); // This is the window size
-  glutCreateWindow("OpenGL Example Program"); // Window Title
+  glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT); // This is the window size
+  glutCreateWindow("CLM"); // Window Title
   init();
   glutDisplayFunc(display);  // Matching Earlier Functions To Their Counterparts
   glutReshapeFunc(reshape);
   glutKeyboardFunc(keyboard);
+  draw0();
+  display();
   glutMainLoop();  // Initialize The Main Loop
   return 0;
 }

@@ -16,11 +16,14 @@ typedef cml::vector4d    vector4;
 #include "point.h"
 #include "Scene.cpp"
 
+///////////////////////////////////////////////////////////
+void initRaster();
+
 /**********************************************************
 * // GLOBAL CRAP
 **********************************************************/
-const int SCREEN_HEIGHT = 640;
-const int SCREEN_WIDTH  = 480;
+const int SCREEN_HEIGHT = 480;
+const int SCREEN_WIDTH  = 640;
 const int RASTER_SIZE = SCREEN_HEIGHT * SCREEN_WIDTH * 3;
 float raster[RASTER_SIZE];
 int drawMode = 0;
