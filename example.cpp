@@ -48,13 +48,9 @@ inline int getIndexOfClosestHit(const Ray& r, double &d)
   d = 20000.0;
 
   for (int i = 0; i < currentScene.sceneObjects.size(); i++)
-  {
     if (currentScene.sceneObjects[i].rayHitMeCloserThanD(r, d))
-    { 
-      //cout << "Hit Somthing!\n"; 
       indexHitSphere = i;
-    }
-  } 
+
   return indexHitSphere;
 }
 
@@ -109,6 +105,7 @@ vector4 shootRay(const Ray& r, int level=0, double coef=1.0)
   lightRay.pos = hitPoint;
 
   vector4 light(0,0,0,0);
+  vector4 specColor(0,0,0,0);
   for (int i = 0; i < currentScene.lights.size(); i++)
   {
     Light currentLight = currentScene.lights[i];
@@ -116,11 +113,26 @@ vector4 shootRay(const Ray& r, int level=0, double coef=1.0)
     lightRay.dir = currentLight.pos - hitPoint;
     double lightDist = dot(lightRay.dir,lightRay.dir);
     lightRay.dir = lightRay.dir.normalize();
-    
+    double lightProjection = cml::dot(hitPntNormal, lightRay.dir);
+
     if (!inShadow(lightRay, lightDist))
-      light += max(0.0, (double)cml::dot(hitPntNormal, lightRay.dir)) *
-               coef * 
-               currentLight.deffuseColor;
+    {
+      if (lightProjection > 0)
+      {
+        //Calc Light
+        light += lightProjection * coef * currentLight.deffuseColor;
+
+        //Calc Spec
+        vector4 halfway = (lightRay.dir + vector4(0,0,1,0)).normalize();
+            
+        specColor += max(0.0, 
+                         pow(cml::dot(hitPntNormal, halfway), 
+                             currentScene.sceneObjects[indexClosestHitSphere].shinyness)) 
+                  * coef
+                  * elementTimes(currentScene.sceneObjects[indexClosestHitSphere].specColor, 
+                                 currentLight.specColor);  
+      }
+    }
   }
   
   //Shoot Next Ray
@@ -131,7 +143,37 @@ vector4 shootRay(const Ray& r, int level=0, double coef=1.0)
   nextRay.dir = r.dir - reflet * hitPntNormal;
 
   return elementTimes(currentScene.sceneObjects[indexClosestHitSphere].color, 
-                      light + coef * shootRay(nextRay, level+1, coef));
+                      light + coef * shootRay(nextRay, level+1, coef)) 
+         + coef*specColor;
+}
+
+
+/**********************************************************
+* Shoot and averages multiple rays through a single pixcel.
+**********************************************************/
+vector4 antiAlias(int x, int y)
+{
+  vector4 color(0,0,0,0);
+  double sampleRatio = .25L;
+
+  for (double fragmentx = double(x); fragmentx < x + 1.0L; fragmentx += 0.5L)
+  for (double fragmenty = double(y); fragmenty < y + 1.0L; fragmenty += 0.5L)
+  {
+    vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + x,
+                   (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + y,
+                   currentScene.camera.pos[2]  + 1,
+                   0);
+
+    //cout << rayPos << endl;
+    vector4 rayDir(0,0,1,0);
+    //vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
+
+    Ray r(rayPos, rayDir);
+
+    color += sampleRatio * shootRay(r);
+  }
+
+  return color;
 }
 
 /**********************************************************
@@ -143,22 +185,8 @@ void ray_trace()
   //Walk through Each Point
   for (int x = 0; x < SCREEN_WIDTH; x++)
     for (int y = 0; y < SCREEN_HEIGHT; y++)
-    {
-      vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + x,
-                     (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + y,
-                     currentScene.camera.pos[2]  + 1,
-                     0);
+      setPixel(x,y,antiAlias(x,y));
 
-      //cout << rayPos << endl;
-      vector4 rayDir(0,0,1,0);
-      //vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
-
-      Ray r(rayPos, rayDir);
-
-      vector4 color = shootRay(r);
-
-      setPixel(x,y,color);
-    }
   return;
 }
 
@@ -188,7 +216,8 @@ void draw0()
   //Added a Light
   currentScene.addLight(Light(vector4(600,400,0,0),
                               vector4(1,1,1,1),
-                              vector4(.1,.1,.1,1)));
+                              vector4(.1,.1,.1,1),
+                              vector4(0,1,0,0)));
 
 
   //Set Camera
@@ -237,12 +266,14 @@ void draw1()
   //Added a Light
   currentScene.addLight(Light(vector4(0,240,250,0),
                               vector4(1,1,1,1),
-                              vector4(.1,.1,.1,1)));
+                              vector4(.1,.1,.1,1),
+                              vector4(0,1,0,0)));
 
 //Added a Light
   currentScene.addLight(Light(vector4(640,240,0,0),
                               vector4(.09,.09,.09,0),
-                              vector4(.1,.1,.1,1)));
+                              vector4(.1,.1,.1,1),
+                              vector4(0,1,0,0)));
 
   //Set Camera
   double cpos[] = {250,200,0,0};
@@ -257,7 +288,93 @@ void draw1()
   return;
 }
 
+/**********************************************************
+**********************************************************/
+void draw2()
+{
+  //Clear the raster
+  initRaster();
 
+  //Set up Scene
+  currentScene.clear();
+
+  //Add Objects
+  double s[] = {500,500,200,0};
+
+  Sphere a(s, 100, vector4(1,0,0,0), 1, vector4(1,1,1,0), 1);
+  currentScene.addObj(a);  
+
+  //Added a Light
+  currentScene.addLight(Light(vector4(600,400,99,0),
+                              vector4(1,1,1,1),
+                              vector4(.1,.1,.1,1),
+                              vector4(0,1,0,0)));
+
+
+  //Set Camera
+  double s1[] = {500,500,0,0};
+  double s2[] = {0,0,1,0};
+  currentScene.setCamera(Camera(s1,s2));
+
+  //Ray_Trace
+  ray_trace();
+  
+  cout << "DONE2" << endl;
+
+  return;
+}
+
+/**********************************************************
+**********************************************************/
+void draw3()
+{
+  //Clear the raster
+  initRaster();
+
+  //Set up Scene
+  currentScene.clear();
+
+  double i = 1.5;
+
+  //Add Objects
+  double s[] = {233,290,400,0};
+  Sphere a(s, 100, vector4(i,i,0,0), .5, vector4(1,1,1,0), 1);
+  currentScene.addObj(a);  
+
+  //Add Objects
+  double s1[] = {407,290,400,0};
+  Sphere a1(s1, 100, vector4(0,i,i,0), .5, vector4(1,0,1,0), 1);
+  currentScene.addObj(a1);  
+
+  //Add Objects
+  double s2[] = {320,140,400,0};
+  Sphere a2(s2, 100, vector4(i,0,i,0), .5, vector4(0,1,1,0), 1);
+  currentScene.addObj(a2);  
+
+  //Added a Light
+  currentScene.addLight(Light(vector4(0,240,250,0),
+                              vector4(1,1,1,1),
+                              vector4(.1,.1,.1,1),
+                              vector4(0,1,0,0)));
+
+//Added a Light
+  currentScene.addLight(Light(vector4(640,240,0,0),
+                              vector4(.09,.09,.09,0),
+                              vector4(.1,.1,.1,1),
+                              vector4(0,1,0,0)));
+
+  //Set Camera
+  double cpos[] = {250,200,0,0};
+  double cdir[] = {0,0,1,0};
+  currentScene.setCamera(Camera(cpos,cdir));
+
+  //Ray_Trace
+  ray_trace();
+  
+  cout << "DONE1" << endl;
+
+  return;
+}
 
 
 /**********************************************************
@@ -352,7 +469,15 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
       draw1();
       display();
       break;
-		default:
+    case 51:
+      draw2();
+      display();
+      break;
+    case 52:
+      draw3();
+      display();
+      break;
+    default:
 			break;
 	}
 }

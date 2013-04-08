@@ -16,8 +16,8 @@ public:
 			double radius, 
 			const vector4 &c,
 			double reflectivity=1, 
-			const vector4 &sc=vector4(1,1,1,0),
-		   	double shinyness=1)
+			const vector4 &sc=vector4(0,0,0,0),
+		   	double shinyness=0)
 	:pos(p[0],p[1],p[2],p[3]),
 	radius(radius),
 	color(c),
