@@ -82,8 +82,10 @@ inline bool inShadow(const Ray& lightRay, double d)
 * generate the color for that pixel based off of any
 * objects it hits in the scene.
 **********************************************************/
-vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0, double coef=1.0)
+vector4 shootRay(const Ray& r, int level=0, double coef=1.0)
 {
+  vector4 color(0,0,0,0);
+
   //cout << "level: " << level << endl;
   if (level > 3) return color;
 
@@ -120,9 +122,7 @@ vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0, doub
                coef * 
                currentLight.deffuseColor;
   }
-  vector4 objColor = elementTimes(currentScene.sceneObjects[indexClosestHitSphere].color, light);
-  color += objColor;
-
+  
   //Shoot Next Ray
   Ray nextRay;
   coef *= currentScene.sceneObjects[indexClosestHitSphere].reflectivity;
@@ -130,7 +130,8 @@ vector4 shootRay(const Ray& r, vector4 color=vector4(0,0,0,0), int level=0, doub
   nextRay.pos = hitPoint;
   nextRay.dir = r.dir - reflet * hitPntNormal;
 
-  return shootRay(nextRay, color, level+1, coef);
+  return elementTimes(currentScene.sceneObjects[indexClosestHitSphere].color, 
+                      light + coef * shootRay(nextRay, level+1, coef));
 }
 
 /**********************************************************
