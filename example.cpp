@@ -163,8 +163,6 @@ Ray ComputeCameraRay(int i, int j)
 
   vector4 ray_direction = (image_point - currentScene.camera.pos).normalize();
 
-  //cout << image_point << endl;
-
   return Ray(currentScene.camera.pos, ray_direction);
 }
 
@@ -176,27 +174,9 @@ vector4 antiAlias(int x, int y)
   vector4 color(0,0,0,0);
   double sampleRatio = .25L;
 
-
-  // double fragmentx = double(x);
-  // double fragmenty = double(y);
-
   for (double fragmentx = double(x); fragmentx < x + 1.0L; fragmentx += 0.5L)
-  for (double fragmenty = double(y); fragmenty < y + 1.0L; fragmenty += 0.5L)
-  {
-    // vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + fragmentx,
-    //                (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + fragmenty,
-    //                currentScene.camera.pos[2]  + 1,
-    //                0);
-
-//    vector4 rayDir(0,0,1,0);
-    // vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
-
-    // Ray r(currentScene.camera.pos, rayDir);
-
-     color += sampleRatio * shootRay(ComputeCameraRay(fragmentx, fragmenty));
-    //  color += shootRay(ComputeCameraRay(fragmentx, fragmenty));
-    //color += sampleRatio * shootRay(r);
-  }
+    for (double fragmenty = double(y); fragmenty < y + 1.0L; fragmenty += 0.5L)
+      color += sampleRatio * shootRay(ComputeCameraRay(fragmentx, fragmenty));
 
   return color;
 }
