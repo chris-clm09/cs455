@@ -164,10 +164,8 @@ vector4 antiAlias(int x, int y)
                    currentScene.camera.pos[2]  + 1,
                    0);
 
-    //cout << rayPos << endl;
     vector4 rayDir(0,0,1,0);
-    //vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
-
+    
     Ray r(rayPos, rayDir);
 
     color += sampleRatio * shootRay(r);
