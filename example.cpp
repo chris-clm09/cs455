@@ -217,7 +217,6 @@ void draw0()
                               vector4(.1,.1,.1,1),
                               vector4(0,1,0,0)));
 
-
   //Set Camera
   double s1[] = {500,500,0,0};
   double s2[] = {0,0,1,0};
@@ -244,7 +243,7 @@ void draw1()
   //Set up Scene
   currentScene.clear();
 
-  double i = 1.5;
+  double i = 1;
 
   //Add Objects
   double s[] = {233,290,400,0};
@@ -332,7 +331,7 @@ void draw3()
   //Set up Scene
   currentScene.clear();
 
-  double i = 1.5;
+  double i = 1;
 
   //Add Objects
   double s[] = {233,290,400,0};
@@ -369,7 +368,59 @@ void draw3()
   //Ray_Trace
   ray_trace();
   
-  cout << "DONE1" << endl;
+  cout << "DONE3" << endl;
+
+  return;
+}
+
+/**********************************************************
+**********************************************************/
+void draw4()
+{
+  //Clear the raster
+  initRaster();
+
+  //Set up Scene
+  currentScene.clear();
+
+  double i = 1;
+
+  //Add Objects
+  double s[] = {233,290,400,0};
+  Sphere a(s, 100, vector4(i,0,0,0), .5, vector4(1,1,1,0), 1);
+  currentScene.addObj(a);  
+
+  //Add Objects
+  double s1[] = {407,290,400,0};
+  Sphere a1(s1, 100, vector4(0,i,0,0), .5, vector4(1,1,1,0), 1);
+  currentScene.addObj(a1);  
+
+  //Add Objects
+  double s2[] = {320,140,400,0};
+  Sphere a2(s2, 100, vector4(0,0,i,0), .5, vector4(1,1,1,0), 1);
+  currentScene.addObj(a2);  
+
+  //Added a Light
+  currentScene.addLight(Light(vector4(0,240,250,0),
+                              vector4(1,1,1,1),
+                              vector4(.1,.1,.1,1),
+                              vector4(1,1,1,0)));
+
+//Added a Light
+  currentScene.addLight(Light(vector4(700,240,200,0),
+                              vector4(1,1,1,0),
+                              vector4(.1,.1,.1,1),
+                              vector4(1,1,1,0)));
+
+  //Set Camera
+  double cpos[] = {250,200,0,0};
+  double cdir[] = {0,0,1,0};
+  currentScene.setCamera(Camera(cpos,cdir));
+
+  //Ray_Trace
+  ray_trace();
+  
+  cout << "DONE4" << endl;
 
   return;
 }
@@ -473,6 +524,10 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
       break;
     case 52:
       draw3();
+      display();
+      break;
+    case 53:
+      draw4();
       display();
       break;
     default:
