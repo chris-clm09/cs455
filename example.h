@@ -12,6 +12,7 @@ using namespace std;
 
 typedef cml::matrix44d_c matrix4;
 typedef cml::vector4d    vector4;
+typedef cml::vector3d    vector3;
 
 #include "point.h"
 #include "Scene.cpp"

@@ -149,6 +149,26 @@ vector4 shootRay(const Ray& r, int level=0, double coef=1.0)
 
 
 /**********************************************************
+* Returns a ray in world coordinates that will represent
+* the given x,y screen coordinate.
+**********************************************************/
+Ray ComputeCameraRay(int i, int j) 
+{
+  double normalized_i = (i / (double)SCREEN_WIDTH)  - 0.5;
+  double normalized_j = (j / (double)SCREEN_HEIGHT) - 0.5;
+
+  vector4 image_point = normalized_i * currentScene.camera.right +
+                        normalized_j * currentScene.camera.up +
+                        currentScene.camera.pos + currentScene.camera.dir;
+
+  vector4 ray_direction = (image_point - currentScene.camera.pos).normalize();
+
+  //cout << image_point << endl;
+
+  return Ray(currentScene.camera.pos, ray_direction);
+}
+
+/**********************************************************
 * Shoot and averages multiple rays through a single pixcel.
 **********************************************************/
 vector4 antiAlias(int x, int y)
@@ -156,19 +176,26 @@ vector4 antiAlias(int x, int y)
   vector4 color(0,0,0,0);
   double sampleRatio = .25L;
 
+
+  // double fragmentx = double(x);
+  // double fragmenty = double(y);
+
   for (double fragmentx = double(x); fragmentx < x + 1.0L; fragmentx += 0.5L)
   for (double fragmenty = double(y); fragmenty < y + 1.0L; fragmenty += 0.5L)
   {
-    vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + fragmentx,
-                   (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + fragmenty,
-                   currentScene.camera.pos[2]  + 1,
-                   0);
+    // vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + fragmentx,
+    //                (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + fragmenty,
+    //                currentScene.camera.pos[2]  + 1,
+    //                0);
 
-    vector4 rayDir(0,0,1,0);
-    
-    Ray r(rayPos, rayDir);
+//    vector4 rayDir(0,0,1,0);
+    // vector4 rayDir = (rayPos - currentScene.camera.pos).normalize();
 
-    color += sampleRatio * shootRay(r);
+    // Ray r(currentScene.camera.pos, rayDir);
+
+     color += sampleRatio * shootRay(ComputeCameraRay(fragmentx, fragmenty));
+    //  color += shootRay(ComputeCameraRay(fragmentx, fragmenty));
+    //color += sampleRatio * shootRay(r);
   }
 
   return color;
@@ -231,11 +258,6 @@ void init ()
 **********************************************************/
 void display ( void )   // Create The Display Function
 {
-//	 glClearColor(1,0,0,1);  // Set the clear color
-   // Clear the screen to the clear color (i.e. if the clear color
-   // is red, the screen turns red);
- //  glClear(GL_COLOR_BUFFER_BIT);
-
     // Save the old state so that you can set it back after you draw
     GLint oldmatrixmode;
     GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
@@ -306,6 +328,10 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
       break;
     case 54:
       draw5();
+      display();
+      break;
+    case 55:
+      draw6();
       display();
       break;
     default:
