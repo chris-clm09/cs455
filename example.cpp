@@ -159,8 +159,8 @@ vector4 antiAlias(int x, int y)
   for (double fragmentx = double(x); fragmentx < x + 1.0L; fragmentx += 0.5L)
   for (double fragmenty = double(y); fragmenty < y + 1.0L; fragmenty += 0.5L)
   {
-    vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + x,
-                   (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + y,
+    vector4 rayPos((currentScene.camera.pos[0] - SCREEN_WIDTH  / 2.0) + fragmentx,
+                   (currentScene.camera.pos[1] - SCREEN_HEIGHT / 2.0) + fragmenty,
                    currentScene.camera.pos[2]  + 1,
                    0);
 
