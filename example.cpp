@@ -283,7 +283,7 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
 {
 	switch ( key ) 
 	{
-		case 27:        // When Escape Is Pressed...
+    case 27:        // When Escape Is Pressed...
 			exit ( 0 );  // Exit The Program
 			break;
 		case 49:
@@ -314,7 +314,20 @@ void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
       draw6();
       display();
       break;
+    case 56:
+      draw7();
+      display();
+      break;
+    case 57:
+      draw8();
+      display();
+      break;
+    case 48:
+      draw9();
+      display();
+      break;
     default:
+    cout << (int)key << endl;
 			break;
 	}
 }

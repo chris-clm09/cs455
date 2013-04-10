@@ -333,3 +333,95 @@ void draw6()
 
   return;
 }
+
+/**********************************************************
+**********************************************************/
+void draw7()
+{
+  //Clear the raster
+  initRaster();
+
+  //Set up Scene
+  currentScene.clear();
+
+  double i = 1;
+
+  //Add Objects
+  double s[] = {233,290,400,0};
+  Sphere a(s, 100, vector4(i,0,0,0), .5, vector4(1,1,1,0), 1);
+  currentScene.addObj(a);  
+
+  //Add Objects
+  double s1[] = {407,290,400,0};
+  Sphere a1(s1, 100, vector4(0,i,0,0), .5, vector4(1,1,1,0), 1);
+  currentScene.addObj(a1);  
+
+  //Add Objects
+  double s2[] = {320,140,400,0};
+  Sphere a2(s2, 100, vector4(0,0,i,0), .5, vector4(1,1,1,0), 1);
+  currentScene.addObj(a2);  
+
+  //Added a Light
+  currentScene.addLight(Light(vector4(0,240,250,0),
+                              vector4(1,1,1,1),
+                              vector4(.1,.1,.1,1),
+                              vector4(1,1,1,0)));
+
+//Added a Light
+  currentScene.addLight(Light(vector4(700,240,200,0),
+                              vector4(1,1,1,0),
+                              vector4(.1,.1,.1,1),
+                              vector4(1,1,1,0)));
+
+  //Set Camera
+  vector4 cpos(720,100,900,0);
+  vector4 cdir = (a2.pos - cpos).normalize();
+  currentScene.setCamera(Camera(cpos,cdir));
+
+  //Ray_Trace
+  ray_trace();
+  
+  cout << "DONE7" << endl;
+
+  return;
+}
+
+/**********************************************************
+**********************************************************/
+void draw8()
+{
+  //Clear the raster
+  initRaster();
+
+  //Set Camera
+  vector4 cpos(250,115,700,0);
+  vector4 cdir = (currentScene.sceneObjects[2].pos - cpos).normalize();
+  currentScene.setCamera(Camera(cpos,cdir));
+
+  //Ray_Trace
+  ray_trace();
+  
+  cout << "DONE8" << endl;
+
+  return;
+}
+
+/**********************************************************
+**********************************************************/
+void draw9()
+{
+  //Clear the raster
+  initRaster();
+
+  //Set Camera
+  vector4 cpos(0,115,250,0);
+  vector4 cdir = (currentScene.sceneObjects[2].pos - cpos).normalize();
+  currentScene.setCamera(Camera(cpos,cdir));
+
+  //Ray_Trace
+  ray_trace();
+  
+  cout << "DONE8" << endl;
+
+  return;
+}
