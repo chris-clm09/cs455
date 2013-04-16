@@ -5,6 +5,7 @@ inline bool isOutOfScreen(int x, int y)
   return (x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT || x < 0 || y < 0);
 }
 
+vector4 black(0,0,0,0);
 /**********************************************************
 This function will set the color of a pixel.
 **********************************************************/
@@ -12,14 +13,15 @@ void setPixel(int x, int y, const vector4 & color)
 { 
    //Check if point is in screen and viewport   
    if (isOutOfScreen(x,y)) return;
-        
+
    int temp = ((y * SCREEN_WIDTH) + x) * 3;
    
    raster[ temp + 0 ] = color[0];
    raster[ temp + 1 ] = color[1];
    raster[ temp + 2 ] = color[2];
 
-   //cout << x << " " << y << " " << color << endl;
+   if (color != black)
+    display();
 
    return;
 }
@@ -239,12 +241,12 @@ void init ()
 void display ( void )   // Create The Display Function
 {
     // Save the old state so that you can set it back after you draw
-    GLint oldmatrixmode;
-    GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
-    glDisable(GL_DEPTH_TEST);
-    glGetIntegerv(GL_MATRIX_MODE,&oldmatrixmode);
-    glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
-    glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
+    //GLint oldmatrixmode;
+    //GLboolean depthWasEnabled = glIsEnabled(GL_DEPTH_TEST);
+    //glDisable(GL_DEPTH_TEST);
+    //glGetIntegerv(GL_MATRIX_MODE,&oldmatrixmode);
+    //glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
+    //glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
     
     // Draw the array of pixels (This is where you draw the values
     // you have stored in the array 'raster')
@@ -252,11 +254,11 @@ void display ( void )   // Create The Display Function
     glDrawPixels(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, GL_FLOAT, raster);
     
     //Set the state back to what it was
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW); glPopMatrix();
-    glMatrixMode(oldmatrixmode);
-    if (depthWasEnabled)
-      glEnable(GL_DEPTH_TEST);
+    //glPopMatrix();
+    //glMatrixMode(GL_MODELVIEW); glPopMatrix();
+    //glMatrixMode(oldmatrixmode);
+    //if (depthWasEnabled)
+    //  glEnable(GL_DEPTH_TEST);
 
    glFlush();
 
